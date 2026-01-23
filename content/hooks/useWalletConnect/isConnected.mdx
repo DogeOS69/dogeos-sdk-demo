@@ -1,0 +1,43 @@
+# isConnected
+
+A boolean property that indicates whether a wallet is currently connected.
+
+## Property
+
+`isConnected: boolean`
+
+## Type
+
+`boolean` - `true` if wallet is connected, `false` if not connected
+
+## Usage
+
+```tsx
+import { useWalletConnect } from "@dogeos/dogeos-sdk";
+
+function ConnectionStatus() {
+  const { isConnected, openModal, disconnect } = useWalletConnect();
+
+  return (
+    <div>
+      <div>Status: {isConnected ? "Connected" : "Not Connected"}</div>
+      {isConnected ? (
+        <button onClick={disconnect}>Disconnect</button>
+      ) : (
+        <button onClick={openModal}>Connect</button>
+      )}
+    </div>
+  );
+}
+```
+
+## Related Properties
+
+- `isOpenModal` - Modal open status
+- `isConnecting` - Connection in progress status
+
+## Related Methods
+
+- `connect()` - Connect to a wallet
+- `disconnect()` - Disconnect the wallet
+- `openModal()` - Open wallet selection modal

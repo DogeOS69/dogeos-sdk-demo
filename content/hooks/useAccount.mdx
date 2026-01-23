@@ -1,0 +1,332 @@
+# useAccount
+
+The `useAccount` hook provides access to account information and account-related actions like signing messages and transactions.
+
+## Methods
+
+### signMessage()
+
+Signs a message with the connected wallet. This is used for message verification and authentication.
+
+**Parameters:**
+
+```typescript
+{
+  message: string; // Message to sign
+  nonce?: string; // Optional nonce for additional security
+}
+```
+
+**Returns:** `Promise<string | Uint8Array>` - The signature of the message
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function SignMessageButton() {
+  const { signMessage } = useAccount();
+
+  const onSignMessage = async () => {
+    if (!signMessage) return;
+    
+    try {
+      const sig = await signMessage({ message: "Hello DogeOS" });
+      console.log("signature:", sig);
+    } catch (error) {
+      console.error("Sign failed:", error);
+    }
+  };
+
+  return <button onClick={onSignMessage}>Sign Message</button>;
+}
+```
+
+**Notes:**
+- Requires wallet to be connected
+- The signature format depends on the chain type (EVM, Dogecoin, etc.)
+- For EVM chains, returns a hex string
+
+### signInWithWallet()
+
+Signs in with the wallet using SIW (Sign-In with Wallet) protocol. This generates a signature that can be used for authentication and getting a token.
+
+**Parameters:**
+
+```typescript
+interface SignInParams {
+  scheme?: string; // Protocol scheme (e.g., "https")
+  domain?: string; // Domain name
+  statement?: string; // Statement to sign
+  version?: string; // Protocol version (e.g., "1")
+  nonce?: string; // Random nonce
+  issuedAt?: string; // ISO timestamp
+  resources?: string[]; // Optional resources
+}
+```
+
+**Returns:** `Promise<string | Uint8Array>` - The signature/token for authentication
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function SignInButton() {
+  const { signInWithWallet } = useAccount();
+
+  const handleSignIn = async () => {
+    try {
+      const token = await signInWithWallet();
+      console.log("Auth token:", token);
+    } catch (error) {
+      console.error("Sign in failed:", error);
+    }
+  };
+
+  return <button onClick={handleSignIn}>Sign In</button>;
+}
+```
+
+### switchChain()
+
+Switches the connected wallet to a different chain. This method will attempt to switch the chain, and if the chain is not added to the wallet, it will automatically add it first.
+
+**Parameters:**
+
+```typescript
+interface SwitchChainOptions {
+  chainType: ChainType; // Chain type (e.g., "evm", "dogecoin")
+  chainInfo: Chain; // Chain information object
+}
+```
+
+**Returns:** `Promise<boolean>` - `true` if chain switch was successful
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+import type { SwitchChainOptions } from "@dogeos/dogeos-sdk";
+
+function SwitchChainButton() {
+  const { switchChain } = useAccount();
+
+  const handleSwitch = async () => {
+    if (!switchChain) return;
+    
+    const options: SwitchChainOptions = {
+      chainType: "evm",
+      chainInfo: {
+        id: 137,
+        name: "Polygon",
+        nativeCurrency: {
+          name: "MATIC",
+          symbol: "MATIC",
+          decimals: 18,
+        },
+        rpcUrls: {
+          default: {
+            http: ["https://polygon-rpc.com"],
+          },
+        },
+      },
+    };
+
+    try {
+      const success = await switchChain(options);
+      console.log("Switch successful:", success);
+    } catch (error) {
+      console.error("Switch failed:", error);
+    }
+  };
+
+  return <button onClick={handleSwitch}>Switch to Polygon</button>;
+}
+```
+
+## State Properties
+
+### address
+
+The connected wallet's address. The format depends on the chain type.
+
+**Type:** `string | undefined`
+
+**Format:**
+- EVM: Hex string starting with `0x`
+- Dogecoin: Dogecoin address format
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function AddressDisplay() {
+  const { address } = useAccount();
+
+  if (!address) {
+    return <div>Not connected</div>;
+  }
+
+  return (
+    <div>
+      <div>Address: {address}</div>
+      <div>Short: {address.substring(0, 6)}...{address.substring(address.length - 4)}</div>
+    </div>
+  );
+}
+```
+
+### chainId
+
+The ID of the specific chain the wallet is currently connected to.
+
+**Type:** `string | undefined`
+
+**Format:**
+- EVM chains: Hex string (e.g., `"0x1"` for Ethereum mainnet)
+- Other chains: Decimal string or chain-specific format
+
+### chainType
+
+The type of blockchain the wallet is currently connected to.
+
+**Type:** `"evm" | "dogecoin" | undefined`
+
+**Possible values:**
+- `"evm"` - EVM-compatible chains
+- `"dogecoin"` - Dogecoin blockchain
+
+### balance
+
+The balance of the connected wallet in decimal format (native token balance).
+
+**Type:** `string | undefined`
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function BalanceDisplay() {
+  const { balance, address } = useAccount();
+
+  if (!address) {
+    return <div>Not connected</div>;
+  }
+
+  return <div>Balance: {balance || "0.0"}</div>;
+}
+```
+
+### currentProvider
+
+The provider object for the currently connected chain. This can be used to make RPC calls directly to the blockchain.
+
+**Type:** `object | undefined`
+
+**Provider Types:**
+- **EVM**: EIP-1193 provider with `request()` method
+- **Dogecoin**: Dogecoin-specific provider
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function ProviderExample() {
+  const { currentProvider, chainType, address } = useAccount();
+
+  const handleRpcCall = async () => {
+    if (!currentProvider || chainType !== "evm") {
+      console.log("Provider not available");
+      return;
+    }
+
+    try {
+      const result = await currentProvider.request({
+        method: "eth_blockNumber",
+        params: [],
+      });
+      console.log("Block number:", result);
+    } catch (error) {
+      console.error("RPC call failed:", error);
+    }
+  };
+
+  if (!address) {
+    return <div>Not connected</div>;
+  }
+
+  return (
+    <div>
+      <div>Provider: {currentProvider ? "Available" : "Not available"}</div>
+      <button onClick={handleRpcCall}>Get Block Number</button>
+    </div>
+  );
+}
+```
+
+## Complete Example
+
+```tsx
+import React from "react";
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+export function AccountInfo() {
+  const {
+    address,
+    chainId,
+    chainType,
+    balance,
+    signMessage,
+    signInWithWallet,
+    switchChain,
+    currentProvider,
+  } = useAccount();
+
+  const handleSignMessage = async () => {
+    if (!signMessage) return;
+    
+    try {
+      const sig = await signMessage({
+        message: "Hello World",
+        nonce: Math.random().toString(36).slice(2),
+      });
+      console.log("Signature:", sig);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const handleSignIn = async () => {
+    try {
+      const token = await signInWithWallet();
+      console.log("Token:", token);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  if (!address) {
+    return <div>Please connect your wallet</div>;
+  }
+
+  return (
+    <div>
+      <div>Address: {address}</div>
+      <div>Chain ID: {chainId}</div>
+      <div>Chain Type: {chainType}</div>
+      <div>Balance: {balance}</div>
+      <button onClick={handleSignMessage}>Sign Message</button>
+      <button onClick={handleSignIn}>Sign In</button>
+      {switchChain && (
+        <button onClick={() => switchChain({ chainType: "evm", chainInfo: {...} })}>
+          Switch Chain
+        </button>
+      )}
+    </div>
+  );
+}
+```

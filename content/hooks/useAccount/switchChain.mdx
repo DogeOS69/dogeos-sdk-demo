@@ -1,0 +1,97 @@
+# switchChain
+
+Switches the connected wallet to a different chain. This method will attempt to switch the chain, and if the chain is not added to the wallet, it will automatically add it first.
+
+## Method
+
+`switchChain(options: SwitchChainOptions)`
+
+## Parameters
+
+```typescript
+interface SwitchChainOptions {
+  chainType: ChainType; // Chain type (e.g., "evm", "dogecoin")
+  chainInfo: Chain; // Chain information object
+}
+
+interface Chain {
+  id: number; // Chain ID
+  name: string; // Chain name
+  nativeCurrency: {
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
+  rpcUrls: {
+    default: {
+      http: string[];
+    };
+  };
+  blockExplorers?: {
+    default: {
+      name: string;
+      url: string;
+    };
+  };
+  testnet?: boolean;
+}
+```
+
+## Returns
+
+`Promise<boolean>` - `true` if chain switch was successful, `false` otherwise
+
+## Usage
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+import type { SwitchChainOptions } from "@dogeos/dogeos-sdk";
+
+function SwitchChainButton() {
+  const { switchChain } = useAccount();
+
+  const handleSwitch = async () => {
+    if (!switchChain) return;
+    
+    const options: SwitchChainOptions = {
+      chainType: "evm",
+      chainInfo: {
+        id: 137,
+        name: "Polygon",
+        nativeCurrency: {
+          name: "MATIC",
+          symbol: "MATIC",
+          decimals: 18,
+        },
+        rpcUrls: {
+          default: {
+            http: ["https://polygon-rpc.com"],
+          },
+        },
+      },
+    };
+
+    try {
+      const success = await switchChain(options);
+      console.log("Switch successful:", success);
+    } catch (error) {
+      console.error("Switch failed:", error);
+    }
+  };
+
+  return <button onClick={handleSwitch}>Switch to Polygon</button>;
+}
+```
+
+## Notes
+
+- Requires wallet to be connected first
+- If the chain is not added to the wallet, it will be added automatically
+- For EVM chains, this uses `wallet_switchEthereumChain` or `wallet_addEthereumChain`
+- User may reject the chain switch request
+
+## Errors
+
+- "Wallet not connected" - Wallet must be connected first
+- User rejection - User can reject the chain switch request
+- Chain not supported - Chain type not supported by wallet

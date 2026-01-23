@@ -1,0 +1,216 @@
+# useWalletConnect
+
+The `useWalletConnect` hook provides methods and state for managing wallet connections and the connection modal.
+
+## Methods
+
+### openModal()
+
+Opens the wallet connection modal. This modal allows users to select and connect to a wallet.
+
+**Parameters:** None
+
+**Returns:** `void`
+
+**Example:**
+
+```tsx
+import { useWalletConnect } from "@dogeos/dogeos-sdk";
+
+function ConnectButton() {
+  const { openModal, isConnected, disconnect } = useWalletConnect();
+
+  return (
+    <button onClick={() => (isConnected ? disconnect() : openModal())}>
+      {isConnected ? "Disconnect" : "Connect Wallet"}
+    </button>
+  );
+}
+```
+
+### closeModal()
+
+Closes the wallet connection modal if it is currently open.
+
+**Parameters:** None
+
+**Returns:** `void`
+
+**Example:**
+
+```tsx
+import { useWalletConnect } from "@dogeos/dogeos-sdk";
+
+function ModalControls() {
+  const { openModal, closeModal, isOpenModal } = useWalletConnect();
+
+  return (
+    <div>
+      <button onClick={openModal}>Open Modal</button>
+      {isOpenModal && (
+        <button onClick={closeModal}>Close Modal</button>
+      )}
+    </div>
+  );
+}
+```
+
+### connect()
+
+Connects to a wallet programmatically. This method requires a wallet connector object and is typically used internally by the SDK. For user-facing connections, use `openModal()` instead.
+
+**Parameters:**
+
+```typescript
+interface ConnectVariables {
+  wallet: Connector; // Wallet connector object
+  chainType: ChainType; // Chain type (e.g., "evm", "dogecoin")
+  chainId?: string; // Optional chain ID
+}
+```
+
+**Returns:** `Promise<ConnectData>` - Connection data including address, chainId, and chainType
+
+**Example:**
+
+```tsx
+import { useWalletConnect } from "@dogeos/dogeos-sdk";
+import type { ConnectVariables } from "@dogeos/dogeos-sdk";
+
+function ConnectProgrammatically() {
+  const { connect } = useWalletConnect();
+
+  const handleConnect = async () => {
+    try {
+      const variables: ConnectVariables = {
+        wallet: walletConnector, // From wallet list
+        chainType: "evm",
+        chainId: "0x1",
+      };
+      const data = await connect(variables);
+      console.log("Connected:", data);
+    } catch (error) {
+      console.error("Connection failed:", error);
+    }
+  };
+
+  return <button onClick={handleConnect}>Connect</button>;
+}
+```
+
+### disconnect()
+
+Disconnects the currently connected wallet and clears the connection state.
+
+**Parameters:** None
+
+**Returns:** `Promise<void>`
+
+**Example:**
+
+```tsx
+import { useWalletConnect } from "@dogeos/dogeos-sdk";
+
+function DisconnectButton() {
+  const { disconnect, isConnected } = useWalletConnect();
+
+  if (!isConnected) {
+    return <div>Not connected</div>;
+  }
+
+  return <button onClick={disconnect}>Disconnect</button>;
+}
+```
+
+## State Properties
+
+### isConnected
+
+A boolean property that indicates whether a wallet is currently connected.
+
+**Type:** `boolean`
+
+**Example:**
+
+```tsx
+import { useWalletConnect } from "@dogeos/dogeos-sdk";
+
+function ConnectionStatus() {
+  const { isConnected, openModal, disconnect } = useWalletConnect();
+
+  return (
+    <div>
+      <div>Status: {isConnected ? "Connected" : "Not Connected"}</div>
+      {isConnected ? (
+        <button onClick={disconnect}>Disconnect</button>
+      ) : (
+        <button onClick={openModal}>Connect</button>
+      )}
+    </div>
+  );
+}
+```
+
+### isConnecting
+
+Boolean indicating whether a connection is in progress.
+
+**Type:** `boolean`
+
+### isOpenModal
+
+Boolean indicating whether the connection modal is open.
+
+**Type:** `boolean`
+
+### error
+
+Error object if an error occurred during connection.
+
+**Type:** `Error | null`
+
+## Complete Example
+
+```tsx
+import React from "react";
+import { useWalletConnect } from "@dogeos/dogeos-sdk";
+
+export function WalletConnection() {
+  const {
+    openModal,
+    closeModal,
+    connect,
+    disconnect,
+    isConnected,
+    isConnecting,
+    isOpenModal,
+    error,
+  } = useWalletConnect();
+
+  if (isConnecting) {
+    return <div>Connecting...</div>;
+  }
+
+  if (error) {
+    return (
+      <div>
+        <p>Error: {error.message}</p>
+        <button onClick={openModal}>Try Again</button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {isConnected ? (
+        <button onClick={disconnect}>Disconnect</button>
+      ) : (
+        <button onClick={openModal}>Connect Wallet</button>
+      )}
+      {isOpenModal && (
+        <button onClick={closeModal}>Close Modal</button>
+      )}
+    </div>
+  );
+}
+```

@@ -1,0 +1,37 @@
+# openModal
+
+Opens the wallet connection modal. This modal allows users to select and connect to a wallet.
+
+## Method
+
+`openModal()`
+
+## Parameters
+
+None
+
+## Returns
+
+`void` - No return value
+
+## Usage
+
+```tsx
+import { useWalletConnect } from "@dogeos/dogeos-sdk";
+
+function ConnectButton() {
+  const { openModal, isConnected, disconnect } = useWalletConnect();
+
+  return (
+    <button onClick={() => (isConnected ? disconnect() : openModal())}>
+      {isConnected ? "Disconnect" : "Connect Wallet"}
+    </button>
+  );
+}
+```
+
+## Related Methods
+
+- `closeModal()` - Closes the modal
+- `isOpenModal` - Boolean state indicating if modal is open
+- `disconnect()` - Disconnects the wallet

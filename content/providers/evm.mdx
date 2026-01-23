@@ -1,0 +1,482 @@
+# EVM Provider
+
+The EVM Provider provides access to Ethereum-compatible blockchain methods through the `currentProvider` from the `useAccount` hook.
+
+## Getting the Provider
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function EVMExample() {
+  const { currentProvider, chainType } = useAccount();
+
+  // Ensure we're on an EVM chain
+  if (chainType !== "evm" || !currentProvider) {
+    return <div>Please connect an EVM wallet</div>;
+  }
+
+  // Use currentProvider.request() to call EVM methods
+}
+```
+
+## Methods
+
+### eth_chainId
+
+Returns the current chain ID.
+
+**Parameters:** None
+
+**Returns:** `Promise<string>` - Chain ID in hexadecimal format (e.g., `"0x1"`)
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function GetChainId() {
+  const { currentProvider } = useAccount();
+
+  const getChainId = async () => {
+    if (!currentProvider) return;
+    
+    try {
+      const chainId = await currentProvider.request({ method: "eth_chainId" });
+      console.log("Chain ID:", chainId); // "0x1"
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={getChainId}>Get Chain ID</button>;
+}
+```
+
+**Common Chain IDs:**
+- `0x1` - Ethereum Mainnet
+- `0x5` - Goerli Testnet
+- `0x89` - Polygon Mainnet
+- `0x2105` - Base Mainnet
+- `0xa` - Optimism Mainnet
+- `0xa4b1` - Arbitrum One
+
+### eth_getBalance
+
+Returns the balance of the specified address.
+
+**Parameters:**
+
+```typescript
+[
+  address: string, // Address to check balance for
+  blockTag?: string // Optional block tag (default: "latest")
+]
+```
+
+**Returns:** `Promise<string>` - Balance in wei (hex string)
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function GetBalance() {
+  const { currentProvider, address } = useAccount();
+
+  const getBalance = async () => {
+    if (!currentProvider || !address) return;
+    
+    try {
+      const balance = await currentProvider.request({
+        method: "eth_getBalance",
+        params: [address, "latest"],
+      });
+      console.log("Balance:", balance);
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={getBalance}>Get Balance</button>;
+}
+```
+
+**Notes:**
+- The balance is returned in wei (1 ETH = 10^18 wei)
+- To convert to ETH, divide by 10^18
+- Use `"latest"` for the most recent balance
+
+### eth_sendTransaction
+
+Creates, signs, and sends a new transaction to the network.
+
+**Parameters:**
+
+```typescript
+[
+  {
+    from: string; // Sender address
+    to: string; // Recipient address
+    value?: string; // Amount in wei (hex)
+    data?: string; // Transaction data (hex)
+    gas?: string; // Gas limit (hex)
+    gasPrice?: string; // Gas price (hex)
+    chainId?: string; // Chain ID (hex)
+  }
+]
+```
+
+**Returns:** `Promise<string>` - Transaction hash
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function SendTransaction() {
+  const { currentProvider, address } = useAccount();
+
+  const sendTransaction = async () => {
+    if (!currentProvider || !address) return;
+    
+    try {
+      const txHash = await currentProvider.request({
+        method: "eth_sendTransaction",
+        params: [
+          {
+            from: address,
+            to: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+            value: "0x2386f26fc10000", // 0.01 ETH
+          },
+        ],
+      });
+      console.log("Transaction hash:", txHash);
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={sendTransaction}>Send Transaction</button>;
+}
+```
+
+### eth_signTransaction
+
+Signs a transaction without sending it.
+
+**Parameters:**
+
+```typescript
+[
+  {
+    from: string;
+    to: string;
+    value?: string;
+    data?: string;
+    gas?: string;
+    gasPrice?: string;
+    chainId?: string;
+  }
+]
+```
+
+**Returns:** `Promise<object>` - Signed transaction object
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function SignTransaction() {
+  const { currentProvider, address } = useAccount();
+
+  const signTransaction = async () => {
+    if (!currentProvider || !address) return;
+    
+    try {
+      const signedTx = await currentProvider.request({
+        method: "eth_signTransaction",
+        params: [
+          {
+            from: address,
+            to: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+            value: "0x2386f26fc10000",
+            gas: "0x7530",
+            chainId: "0x1",
+          },
+        ],
+      });
+      console.log("Signed transaction:", signedTx);
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={signTransaction}>Sign Transaction</button>;
+}
+```
+
+### eth_signTypedData_v4
+
+Signs typed data according to EIP-712.
+
+**Parameters:**
+
+```typescript
+[
+  address: string, // Address to sign with
+  typedData: string // JSON stringified EIP-712 typed data
+]
+```
+
+**Returns:** `Promise<string>` - Signature
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function SignTypedData() {
+  const { currentProvider, address } = useAccount();
+
+  const signTypedData = async () => {
+    if (!currentProvider || !address) return;
+    
+    const typedData = {
+      types: {
+        EIP712Domain: [
+          { name: "name", type: "string" },
+          { name: "version", type: "string" },
+          { name: "chainId", type: "uint256" },
+        ],
+        Person: [
+          { name: "name", type: "string" },
+          { name: "wallet", type: "address" },
+        ],
+      },
+      primaryType: "Person",
+      domain: {
+        name: "My App",
+        version: "1",
+        chainId: 1,
+      },
+      message: {
+        name: "Alice",
+        wallet: address,
+      },
+    };
+
+    try {
+      const signature = await currentProvider.request({
+        method: "eth_signTypedData_v4",
+        params: [address, JSON.stringify(typedData)],
+      });
+      console.log("Signature:", signature);
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={signTypedData}>Sign Typed Data</button>;
+}
+```
+
+### wallet_addEthereumChain
+
+Adds a new Ethereum chain to the wallet.
+
+**Parameters:**
+
+```typescript
+[
+  {
+    chainId: string; // Chain ID (hex)
+    chainName: string;
+    nativeCurrency: {
+      name: string;
+      symbol: string;
+      decimals: number;
+    };
+    rpcUrls: string[];
+    blockExplorerUrls?: string[];
+  }
+]
+```
+
+**Returns:** `Promise<null>`
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function AddChain() {
+  const { currentProvider } = useAccount();
+
+  const addChain = async () => {
+    if (!currentProvider) return;
+    
+    try {
+      await currentProvider.request({
+        method: "wallet_addEthereumChain",
+        params: [
+          {
+            chainId: "0x89", // Polygon
+            chainName: "Polygon Mainnet",
+            nativeCurrency: {
+              name: "MATIC",
+              symbol: "MATIC",
+              decimals: 18,
+            },
+            rpcUrls: ["https://polygon-rpc.com"],
+            blockExplorerUrls: ["https://polygonscan.com"],
+          },
+        ],
+      });
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={addChain}>Add Polygon Chain</button>;
+}
+```
+
+### eth_estimateGas
+
+Generates and returns an estimate of how much gas is necessary to allow the transaction to complete.
+
+**Parameters:**
+
+```typescript
+[
+  {
+    from?: string;
+    to?: string;
+    value?: string;
+    data?: string;
+    gas?: string;
+    gasPrice?: string;
+  }
+]
+```
+
+**Returns:** `Promise<string>` - Estimated gas amount (hex string)
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function EstimateGas() {
+  const { currentProvider, address } = useAccount();
+
+  const estimateGas = async () => {
+    if (!currentProvider || !address) return;
+    
+    try {
+      const gas = await currentProvider.request({
+        method: "eth_estimateGas",
+        params: [
+          {
+            from: address,
+            to: "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+            value: "0x16345785d8a0000",
+          },
+        ],
+      });
+      console.log("Estimated Gas:", gas);
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={estimateGas}>Estimate Gas</button>;
+}
+```
+
+### eth_getTransactionCount
+
+Returns the number of transactions sent from an address (nonce).
+
+**Parameters:**
+
+```typescript
+[
+  address: string, // Address to check
+  blockTag?: string // Optional block tag (default: "latest")
+]
+```
+
+**Returns:** `Promise<string>` - Transaction count/nonce (hex string)
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function GetTransactionCount() {
+  const { currentProvider, address } = useAccount();
+
+  const getTransactionCount = async () => {
+    if (!currentProvider || !address) return;
+    
+    try {
+      const count = await currentProvider.request({
+        method: "eth_getTransactionCount",
+        params: [address, "latest"],
+      });
+      console.log("Transaction Count:", count);
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={getTransactionCount}>Get Transaction Count</button>;
+}
+```
+
+## Complete Example
+
+```tsx
+import React from "react";
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+export function EVMProviderExample() {
+  const { currentProvider, address, chainType } = useAccount();
+
+  if (chainType !== "evm" || !currentProvider) {
+    return <div>Please connect an EVM wallet</div>;
+  }
+
+  const handleGetChainId = async () => {
+    try {
+      const chainId = await currentProvider.request({ method: "eth_chainId" });
+      console.log("Chain ID:", chainId);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const handleGetBalance = async () => {
+    if (!address) return;
+    
+    try {
+      const balance = await currentProvider.request({
+        method: "eth_getBalance",
+        params: [address, "latest"],
+      });
+      console.log("Balance:", balance);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  return (
+    <div>
+      <button onClick={handleGetChainId}>Get Chain ID</button>
+      <button onClick={handleGetBalance}>Get Balance</button>
+    </div>
+  );
+}
+```

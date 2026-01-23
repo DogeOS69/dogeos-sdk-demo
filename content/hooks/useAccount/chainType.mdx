@@ -1,0 +1,48 @@
+# chainType
+
+The type of blockchain the wallet is currently connected to.
+
+## Property
+
+`chainType?: ChainType`
+
+## Type
+
+`"evm" | "dogecoin" | undefined`
+
+## Possible Values
+
+- `"evm"` - EVM-compatible chains (Ethereum, Polygon, BSC, etc.)
+- `"dogecoin"` - Dogecoin blockchain
+
+## Usage
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function ChainTypeDisplay() {
+  const { chainType, address } = useAccount();
+
+  if (!address) {
+    return <div>Not connected</div>;
+  }
+
+  return (
+    <div>
+      <div>Chain Type: {chainType || "Unknown"}</div>
+    </div>
+  );
+}
+```
+
+## Notes
+
+- Returns `undefined` if wallet is not connected
+- Chain type determines which methods and features are available
+- Different chain types have different address formats and RPC methods
+
+## Related Properties
+
+- `chainId` - Current chain ID
+- `address` - Wallet address
+- `currentProvider` - Current wallet provider
