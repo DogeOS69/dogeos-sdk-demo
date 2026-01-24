@@ -1,0 +1,88 @@
+# Introduction
+
+DogeOS SDK is a comprehensive React SDK for integrating crypto wallet connection functionality into your applications. It provides a configurable wallet list modal and basic account operations.
+
+## Overview
+
+The SDK supports two main types of wallets:
+
+- **Social Wallets**: Email-based passwordless wallets and social login wallets (Google, X/Twitter)
+- **EOA Wallets**: External wallet applications (MetaMask, WalletConnect, etc.)
+
+Each wallet type supports different methods and operations, providing flexibility for various use cases.
+
+## Key Features
+
+- **Easy Integration**: Simple setup with React hooks
+- **Multiple Wallet Support**: Connect to various wallet types (EVM, Dogecoin)
+- **Social Login**: Support for email passwordless and social login methods
+- **Theme Customization**: Customize the UI to match your brand
+- **TypeScript Support**: Full TypeScript definitions for better developer experience
+
+## Requirements
+
+- React 18 or higher
+- TypeScript 5 or higher (recommended)
+
+## Installation
+
+Install the SDK using your preferred package manager:
+
+```bash
+npm install @dogeos/dogeos-sdk
+```
+
+```bash
+pnpm add @dogeos/dogeos-sdk
+```
+
+```bash
+yarn add @dogeos/dogeos-sdk
+```
+
+## Quick Example
+
+```tsx
+import { WalletConnectProvider, useWalletConnect, useAccount } from "@dogeos/dogeos-sdk";
+
+function App() {
+  return (
+    <WalletConnectProvider
+      config={{
+        clientId: "your-client-id",
+      }}
+    >
+      <WalletDemo />
+    </WalletConnectProvider>
+  );
+}
+
+function WalletDemo() {
+  const { openModal, isConnected, disconnect } = useWalletConnect();
+  const { address, chainId, signMessage } = useAccount();
+
+  return (
+    <div>
+      {isConnected ? (
+        <div>
+          <div>Address: {address}</div>
+          <div>Chain ID: {chainId}</div>
+          <button onClick={() => signMessage?.({ message: "Hello" })}>
+            Sign Message
+          </button>
+          <button onClick={disconnect}>Disconnect</button>
+        </div>
+      ) : (
+        <button onClick={openModal}>Connect Wallet</button>
+      )}
+    </div>
+  );
+}
+```
+
+## Next Steps
+
+- Read the [Quick Start](./quickstart) guide to get started
+- Explore the [Provider Configuration](./provider-config) for advanced setup
+- Check out the [Hooks](./hooks) documentation for available hooks
+- Learn about [Providers](./providers) for chain-specific operations

@@ -1,0 +1,51 @@
+# address
+
+The connected wallet's address. The format depends on the chain type.
+
+## Property
+
+`address?: string`
+
+## Type
+
+`string | undefined` - The wallet address in the appropriate format for the chain type
+
+## Format
+
+- **EVM**: Hex string starting with `0x`
+- **Dogecoin**: Dogecoin address format
+
+## Usage
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function AddressDisplay() {
+  const { address } = useAccount();
+
+  if (!address) {
+    return <div>Not connected</div>;
+  }
+
+  return (
+    <div>
+      <div>Address: {address}</div>
+      <div>Short: {address.substring(0, 6)}...{address.substring(address.length - 4)}</div>
+    </div>
+  );
+}
+```
+
+## Notes
+
+- Returns `undefined` if wallet is not connected
+- Format depends on chain type:
+  - EVM: Hex string starting with `0x` (e.g., `0x1a9626bfa0a8fa5aff2c7a887ed065000f7e87d29b26939a81c4bde7241001be`)
+  - Dogecoin: Dogecoin address format
+- Address changes when wallet account changes
+
+## Related Properties
+
+- `chainType` - Current chain type
+- `chainId` - Current chain ID
+- `currentProvider` - Current wallet provider

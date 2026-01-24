@@ -1,0 +1,283 @@
+# Dogecoin Provider
+
+The Dogecoin Provider provides access to Dogecoin blockchain methods through the `currentProvider` from the `useAccount` hook.
+
+## Getting the Provider
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function DogecoinExample() {
+  const { currentProvider, chainType } = useAccount();
+
+  // Ensure we're on Dogecoin
+  if (chainType !== "dogecoin" || !currentProvider) {
+    return <div>Please connect a Dogecoin wallet</div>;
+  }
+
+  // Use currentProvider to call Dogecoin methods
+}
+```
+
+## Methods
+
+### requestAccounts()
+
+Requests access to the user's Dogecoin wallet accounts.
+
+**Returns:** `Promise<string[]>` - Array of account addresses
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function RequestAccounts() {
+  const { currentProvider } = useAccount();
+
+  const requestAccounts = async () => {
+    if (!currentProvider) return;
+    
+    try {
+      const accounts = await currentProvider.requestAccounts();
+      console.log("Accounts:", accounts);
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={requestAccounts}>Request Accounts</button>;
+}
+```
+
+**Notes:**
+- This method triggers a user approval prompt
+- Returns an array of connected account addresses
+- The first account is typically the primary account
+- This method is required before accessing other wallet methods
+
+### getAccounts()
+
+Gets the currently connected Dogecoin accounts.
+
+**Returns:** `Promise<string[]>` - Array of account addresses
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function GetAccounts() {
+  const { currentProvider } = useAccount();
+
+  const getAccounts = async () => {
+    if (!currentProvider) return;
+    
+    try {
+      const accounts = await currentProvider.getAccounts();
+      console.log("Accounts:", accounts);
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={getAccounts}>Get Accounts</button>;
+}
+```
+
+### getBalance()
+
+Returns the current balance of the connected Dogecoin wallet.
+
+**Returns:** `Promise<{ balance: number }>` - Object containing the balance in satoshi
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function GetBalance() {
+  const { currentProvider } = useAccount();
+
+  const getBalance = async () => {
+    if (!currentProvider) return;
+    
+    try {
+      const result = await currentProvider.getBalance();
+      console.log("Balance:", result.balance); // Balance in satoshi
+      // To convert to DOGE: result.balance / 100000000
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={getBalance}>Get Balance</button>;
+}
+```
+
+**Notes:**
+- Balance is returned in satoshi (1 DOGE = 100,000,000 satoshi)
+- To convert to DOGE, divide by 100,000,000
+- This method requires the wallet to be connected
+
+### signMessage()
+
+Signs a message with the connected Dogecoin wallet.
+
+**Parameters:**
+
+```typescript
+{
+  message: string; // Message to sign
+}
+```
+
+**Returns:** `Promise<string>` - Signature
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function SignMessage() {
+  const { currentProvider } = useAccount();
+
+  const signMessage = async () => {
+    if (!currentProvider) return;
+    
+    try {
+      const signature = await currentProvider.signMessage({
+        message: "Hello Dogecoin",
+      });
+      console.log("Signature:", signature);
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={signMessage}>Sign Message</button>;
+}
+```
+
+### signPSBT()
+
+Signs a Partially Signed Bitcoin Transaction (PSBT) for Dogecoin.
+
+**Parameters:**
+
+```typescript
+{
+  psbt: string; // PSBT hex string
+}
+```
+
+**Returns:** `Promise<string>` - Signed PSBT
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function SignPSBT() {
+  const { currentProvider } = useAccount();
+
+  const signPSBT = async () => {
+    if (!currentProvider) return;
+    
+    try {
+      const signedPsbt = await currentProvider.signPSBT({
+        psbt: "psbtHexString",
+      });
+      console.log("Signed PSBT:", signedPsbt);
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={signPSBT}>Sign PSBT</button>;
+}
+```
+
+### sendDogecoin()
+
+Sends Dogecoin to a specified address.
+
+**Parameters:**
+
+```typescript
+{
+  to: string; // Recipient address
+  amount: number; // Amount in satoshi
+}
+```
+
+**Returns:** `Promise<string>` - Transaction hash
+
+**Example:**
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function SendDogecoin() {
+  const { currentProvider } = useAccount();
+
+  const sendDogecoin = async () => {
+    if (!currentProvider) return;
+    
+    try {
+      const txHash = await currentProvider.sendDogecoin({
+        to: "D7hrf5D9LPtfC4cRo3UpFg8q6B3KJ2KZ2R",
+        amount: 100000000, // 1 DOGE (in satoshi)
+      });
+      console.log("Transaction hash:", txHash);
+    } catch (error) {
+      console.error("Failed:", error);
+    }
+  };
+
+  return <button onClick={sendDogecoin}>Send Dogecoin</button>;
+}
+```
+
+## Complete Example
+
+```tsx
+import React from "react";
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+export function DogecoinProviderExample() {
+  const { currentProvider, chainType, address } = useAccount();
+
+  if (chainType !== "dogecoin" || !currentProvider) {
+    return <div>Please connect a Dogecoin wallet</div>;
+  }
+
+  const handleGetBalance = async () => {
+    try {
+      const result = await currentProvider.getBalance();
+      const balanceInDoge = result.balance / 100000000;
+      console.log(`Balance: ${balanceInDoge} DOGE`);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const handleSignMessage = async () => {
+    try {
+      const signature = await currentProvider.signMessage({
+        message: "Hello from Dogecoin",
+      });
+      console.log("Signature:", signature);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  return (
+    <div>
+      <button onClick={handleGetBalance}>Get Balance</button>
+      <button onClick={handleSignMessage}>Sign Message</button>
+    </div>
+  );
+}
+```

@@ -1,0 +1,51 @@
+# error
+
+Error object if an error occurred during connection or other wallet operations.
+
+## Property
+
+`error: Error | null`
+
+## Type
+
+`Error | null` - Error object if an error occurred, `null` otherwise
+
+## Usage
+
+```tsx
+import { useWalletConnect } from "@dogeos/dogeos-sdk";
+
+function ConnectionStatus() {
+  const { error, openModal, isConnected } = useWalletConnect();
+
+  if (error) {
+    return (
+      <div>
+        <p>Error: {error.message}</p>
+        <button onClick={openModal}>Try Again</button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      Status: {isConnected ? "Connected" : "Not Connected"}
+    </div>
+  );
+}
+```
+
+## Notes
+
+- Returns `null` if no error has occurred
+- Error is cleared when a new connection attempt is made
+- Common errors include:
+  - User rejection
+  - Network errors
+  - Wallet not available
+  - Chain not supported
+
+## Related Properties
+
+- `isConnected` - Connection status
+- `isConnecting` - Connection in progress status

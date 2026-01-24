@@ -1,148 +1,69 @@
-# Wallet Connect SDK - Usage Examples
+# Nextra Connect Kit Example
 
-## Basic Usage
+A simple documentation site built with Nextra 4.0 framework, following the [official documentation](https://nextra.site/docs/docs-theme/start).
 
-```tsx
-import { WalletConnectProvider } from "./views/WalletConnectProvider";
+## Getting Started
 
-function App() {
-  return (
-    <WalletConnectProvider>
-      <YourApp />
-    </WalletConnectProvider>
-  );
-}
+Install dependencies (if not already installed):
+
+```bash
+pnpm install
 ```
 
-## Configure Connectors (Wallet Connectors)
+Run the development server:
 
-```tsx
-import { WalletConnectProvider } from "./views/WalletConnectProvider";
-
-const config = {
-  connectors: [
-    {
-      id: "my-custom-wallet",
-      name: "My Custom Wallet",
-      namespace: "my.custom.wallet",
-      icon: "https://example.com/icon.png",
-      iconBackground: "#000000",
-      downloadUrls: {
-        chrome: "https://example.com/install",
-      },
-    },
-  ],
-};
-
-function App() {
-  return (
-    <WalletConnectProvider config={config}>
-      <YourApp />
-    </WalletConnectProvider>
-  );
-}
+```bash
+pnpm dev
 ```
 
-## Configure Chains (Supported Chains)
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
 
-```tsx
-import { WalletConnectProvider } from "./views/WalletConnectProvider";
-import type { Chain } from "./views/WalletConnectProvider";
+## Project Structure
 
-const config = {
-  chains: [
-    {
-      id: 1,
-      name: "Ethereum",
-      nativeCurrency: {
-        name: "Ether",
-        symbol: "ETH",
-        decimals: 18,
-      },
-      rpcUrls: {
-        default: {
-          http: ["https://eth.merkle.io"],
-        },
-      },
-      blockExplorers: {
-        default: {
-          name: "Etherscan",
-          url: "https://etherscan.io",
-        },
-      },
-    },
-    {
-      id: 56,
-      name: "BNB Smart Chain",
-      nativeCurrency: {
-        name: "BNB",
-        symbol: "BNB",
-        decimals: 18,
-      },
-      rpcUrls: {
-        default: {
-          http: ["https://bsc-dataseed.binance.org"],
-        },
-      },
-      blockExplorers: {
-        default: {
-          name: "BscScan",
-          url: "https://bscscan.com",
-        },
-      },
-    },
-  ],
-};
-
-function App() {
-  return (
-    <WalletConnectProvider config={config}>
-      <YourApp />
-    </WalletConnectProvider>
-  );
-}
+```
+nextra-connect-kit-example/
+├── app/
+│   └── layout.jsx          # Root layout with Nextra Theme configuration
+├── pages/
+│   └── index.mdx           # Home page content (MDX file)
+├── mdx-components.tsx      # MDX components configuration
+├── next.config.mjs         # Next.js and Nextra configuration
+├── package.json            # Dependencies and scripts
+└── README.md              # Project documentation
 ```
 
-## Configure Both Connectors and Chains
+## Key Files
 
-```tsx
-import { WalletConnectProvider } from "./views/WalletConnectProvider";
-import type { WalletConnectConfig } from "./views/WalletConnectProvider";
+- **`app/layout.jsx`**: Root layout file that configures the Nextra Docs Theme with Layout, Navbar, Footer, and Banner components. This follows the [official Nextra documentation](https://nextra.site/docs/docs-theme/start#create-the-root-layout)
+- **`pages/index.mdx`**: The home page content written in MDX format, using Next.js Pages Router
+- **`next.config.mjs`**: Next.js configuration with Nextra integration
+- **`mdx-components.tsx`**: MDX components configuration for custom components
 
-const config: WalletConnectConfig = {
-  connectors: [
-    // custom wallets
-  ],
-  chains: [
-    // supported chains
-  ],
-};
+## Implementation Details
 
-function App() {
-  return (
-    <WalletConnectProvider config={config}>
-      <YourApp />
-    </WalletConnectProvider>
-  );
-}
+This project uses a simple and effective approach:
+
+- **Pages Router** (`pages` directory) for MDX files - Next.js Pages Router natively supports MDX files without any client component wrapper
+- **App Router Layout** (`app/layout.jsx`) for Nextra Theme configuration - The App Router layout wraps all Pages Router pages, providing the Nextra Theme UI
+- This hybrid approach combines the simplicity of Pages Router for content with the power of App Router for layout configuration
+- The `getPageMap()` function is called in the server component to get the page map from the `pages` directory
+
+## Build
+
+Build the production version:
+
+```bash
+pnpm build
 ```
 
-## Documentation
+Start the production server:
 
-### Connectors
+```bash
+pnpm start
+```
 
-- `connectors` parameter is used to add custom wallet connectors
-- Type reference: [WalletConfig](https://github.com/tomo-inc/wallet-adaptor-base)
-- Standard reference: [wagmi Connectors](https://wagmi.sh/react/api/connectors)
+## Learn More
 
-### Chains
-
-- `chains` parameter is used to configure supported blockchain networks
-- Currently mainly used for EVM-compatible chains
-- Structure compatible with [viem/Chain](https://wagmi.sh/react/api/chains)
-- Standard reference: [wagmi Chains](https://wagmi.sh/react/api/chains)
-
-### Non-EVM Chains
-
-- Support for Solana, Aptos and other non-EVM chains is still under discussion
-- Current version mainly supports EVM chain configuration
+- [Nextra Documentation](https://nextra.site/)
+- [Nextra Docs Theme Guide](https://nextra.site/docs/docs-theme/start)
+- [Next.js Documentation](https://nextjs.org/docs)

@@ -1,0 +1,405 @@
+# Provider Configuration
+
+The `WalletConnectProvider` accepts a configuration object to customize the SDK's behavior. This document describes all available configuration parameters.
+
+## Configuration Interface
+
+```typescript
+interface WalletConnectKitConfig {
+  connectors?: Awaited<GetConnectorsReturnType>;
+  chains?: Awaited<GetChainsReturnType>;
+  defaultConnectChain?: ChainType;
+  walletConnectProjectId?: string;
+  clientId?: string;
+  metadata?: {
+    name: string;
+    description: string;
+    url: string;
+    icons: string[];
+  };
+  theme?: ThemeConfig;
+  login?: UserLoginConfig;
+}
+```
+
+## Parameters
+
+### connectors
+
+Connector configuration for wallet connections. Must be obtained through `getConnectors()` method, cannot be passed directly.
+
+**Type:** `Awaited<GetConnectorsReturnType>`
+
+**Example:**
+
+```tsx
+import { getConnectors, WalletConnectProvider } from "@dogeos/dogeos-sdk";
+import { useEffect, useState } from "react";
+
+function App() {
+  const [connectors, setConnectors] = useState<Awaited<ReturnType<typeof getConnectors>> | undefined>(undefined);
+
+  useEffect(() => {
+    getConnectors().then(setConnectors);
+  }, []);
+
+  return (
+    <WalletConnectProvider config={{ connectors, clientId: "your-client-id" }}>
+      <YourApp />
+    </WalletConnectProvider>
+  );
+}
+```
+
+### chains
+
+Chain configuration for supported blockchains. Must be obtained through `getChains()` method, cannot be passed directly.
+
+**Type:** `Awaited<GetChainsReturnType>`
+
+**Example:**
+
+```tsx
+import { getChains, WalletConnectProvider } from "@dogeos/dogeos-sdk";
+import { useEffect, useState } from "react";
+
+function App() {
+  const [chains, setChains] = useState<Awaited<ReturnType<typeof getChains>> | undefined>(undefined);
+
+  useEffect(() => {
+    getChains().then(setChains);
+  }, []);
+
+  return (
+    <WalletConnectProvider config={{ chains, clientId: "your-client-id" }}>
+      <YourApp />
+    </WalletConnectProvider>
+  );
+}
+```
+
+### defaultConnectChain
+
+Default chain type to connect to when the user opens the wallet modal.
+
+**Type:** `ChainType`
+
+**Default:** `undefined`
+
+**Example:**
+
+```tsx
+import { WalletConnectProvider } from "@dogeos/dogeos-sdk";
+
+const config = {
+  clientId: "your-client-id",
+  defaultConnectChain: "evm", // or "dogecoin"
+};
+
+export function App() {
+  return (
+    <WalletConnectProvider config={config}>
+      <YourApp />
+    </WalletConnectProvider>
+  );
+}
+```
+
+### walletConnectProjectId
+
+WalletConnect project ID. Make sure to replace the projectId with your own WalletConnect Project ID if you wish to use WalletConnect!
+
+**Type:** `string`
+
+**Get your Project ID:** [https://cloud.walletconnect.com/](https://cloud.walletconnect.com/)
+
+**Example:**
+
+```tsx
+import { WalletConnectProvider } from "@dogeos/dogeos-sdk";
+
+const config = {
+  clientId: "your-client-id",
+  walletConnectProjectId: "your-project-id-here",
+};
+
+export function App() {
+  return (
+    <WalletConnectProvider config={config}>
+      <YourApp />
+    </WalletConnectProvider>
+  );
+}
+```
+
+### clientId
+
+SDK client ID. This is required for embedded wallet functionality, including email passwordless login and social login features.
+
+**Type:** `string`
+
+**Required:** Yes (for embedded wallet features)
+
+**Example:**
+
+```tsx
+import { WalletConnectProvider } from "@dogeos/dogeos-sdk";
+
+const config = {
+  clientId: "your-client-id-here",
+};
+
+export function App() {
+  return (
+    <WalletConnectProvider config={config}>
+      <YourApp />
+    </WalletConnectProvider>
+  );
+}
+```
+
+**Note:** The `clientId` is essential for:
+- Email passwordless wallet creation and authentication
+- Social login integration (Google, X/Twitter)
+- Embedded wallet operations
+- User authentication and session management
+
+Get your client ID from [DogeOS](https://sdk.dogeos.com/) before using embedded wallet features.
+
+### metadata
+
+Application metadata for WalletConnect and wallet connections.
+
+**Type:**
+
+```typescript
+{
+  name: string;
+  description: string;
+  url: string;
+  icons: string[];
+}
+```
+
+**Example:**
+
+```tsx
+import { WalletConnectProvider } from "@dogeos/dogeos-sdk";
+
+const config = {
+  clientId: "your-client-id",
+  metadata: {
+    name: "My DApp",
+    description: "My decentralized application",
+    url: "https://myapp.com",
+    icons: ["https://myapp.com/icon.png"],
+  },
+};
+
+export function App() {
+  return (
+    <WalletConnectProvider config={config}>
+      <YourApp />
+    </WalletConnectProvider>
+  );
+}
+```
+
+### theme
+
+Theme configuration for customizing the UI appearance.
+
+**Type:** `ThemeConfig`
+
+```typescript
+type ThemeConfig = {
+  themes?: {
+    light?: {
+      colors?: Record<string, string | Record<string, string>>;
+      [key: string]: unknown;
+    };
+    dark?: {
+      colors?: Record<string, string | Record<string, string>>;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+  defaultTheme?: "dark" | "light";
+};
+```
+
+**Example:**
+
+```tsx
+import { WalletConnectProvider } from "@dogeos/dogeos-sdk";
+import type { ThemeConfig } from "@dogeos/dogeos-sdk";
+
+const config = {
+  theme: {
+    themes: {
+      light: {
+        colors: {
+          primary: {
+            DEFAULT: "#FCD436",
+            foreground: "#12122A",
+          },
+          background: "#FFFFFF",
+          foreground: "#000000",
+        },
+      },
+      dark: {
+        colors: {
+          primary: {
+            DEFAULT: "#FF5CB8",
+            foreground: "#FFF",
+          },
+          background: "#000000",
+          foreground: "#FFFFFF",
+        },
+      },
+    },
+    defaultTheme: "light",
+  } as ThemeConfig,
+  clientId: "your-client-id",
+};
+
+export function App() {
+  return (
+    <WalletConnectProvider config={config}>
+      <YourApp />
+    </WalletConnectProvider>
+  );
+}
+```
+
+### login
+
+Login configuration for social and basic login methods.
+
+**Type:** `UserLoginConfig`
+
+```typescript
+interface UserLoginConfig {
+  basicLogins?: BasicLoginType[];
+  socialLogins?: SocialLoginProvider[];
+}
+
+type BasicLoginType = "email" | "externalWallets";
+
+type SocialLoginProvider = {
+  type: "google" | "x";
+};
+```
+
+**Example:**
+
+```tsx
+import { WalletConnectProvider } from "@dogeos/dogeos-sdk";
+
+const config = {
+  clientId: "your-client-id",
+  login: {
+    // Basic login methods
+    basicLogins: ["email", "externalWallets"], // or ["email"] or ["externalWallets"]
+
+    // Social login methods
+    socialLogins: [
+      {
+        type: "google",
+      },
+      {
+        type: "x",
+      },
+    ],
+  },
+};
+
+export function App() {
+  return (
+    <WalletConnectProvider config={config}>
+      <YourApp />
+    </WalletConnectProvider>
+  );
+}
+```
+
+## Complete Example
+
+```tsx
+import {
+  WalletConnectProvider,
+  getChains,
+  getConnectors,
+} from "@dogeos/dogeos-sdk";
+import type { WalletConnectKitConfig } from "@dogeos/dogeos-sdk";
+import { useEffect, useState } from "react";
+
+export function App() {
+  const [chains, setChains] = useState<
+    Awaited<ReturnType<typeof getChains>> | undefined
+  >(undefined);
+  const [connectors, setConnectors] = useState<
+    Awaited<ReturnType<typeof getConnectors>> | undefined
+  >(undefined);
+
+  useEffect(() => {
+    Promise.all([getChains(), getConnectors()]).then(([chains, connectors]) => {
+      setChains(chains);
+      setConnectors(connectors);
+    });
+  }, []);
+
+  const config: WalletConnectKitConfig = {
+    connectors,
+    chains,
+    defaultConnectChain: "evm",
+    walletConnectProjectId: "your-project-id",
+    clientId: "your-client-id",
+    metadata: {
+      name: "My DApp",
+      description: "My decentralized application",
+      url: "https://myapp.com",
+      icons: ["https://myapp.com/icon.png"],
+    },
+    theme: {
+      themes: {
+        light: {
+          colors: {
+            primary: {
+              DEFAULT: "#FCD436",
+              foreground: "#12122A",
+            },
+            background: "#FFFFFF",
+            foreground: "#000000",
+          },
+        },
+        dark: {
+          colors: {
+            primary: {
+              DEFAULT: "#FF5CB8",
+              foreground: "#FFF",
+            },
+            background: "#000000",
+            foreground: "#FFFFFF",
+          },
+        },
+      },
+      defaultTheme: "light",
+    },
+    login: {
+      basicLogins: ["email", "externalWallets"],
+      socialLogins: [
+        { type: "google" },
+        { type: "x" },
+      ],
+    },
+  };
+
+  return (
+    <WalletConnectProvider config={config}>
+      <YourApp />
+    </WalletConnectProvider>
+  );
+}
+```

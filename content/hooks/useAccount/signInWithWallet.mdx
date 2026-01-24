@@ -1,0 +1,58 @@
+# signInWithWallet
+
+Signs in with the wallet using SIW (Sign-In with Wallet) protocol. This generates a signature that can be used for authentication and getting a token.
+
+## Method
+
+`signInWithWallet(params?)`
+
+## Parameters
+
+```typescript
+interface SignInParams {
+  scheme?: string; // Protocol scheme (e.g., "https")
+  domain?: string; // Domain name
+  statement?: string; // Statement to sign
+  version?: string; // Protocol version (e.g., "1")
+  nonce?: string; // Random nonce
+  issuedAt?: string; // ISO timestamp
+  resources?: string[]; // Optional resources
+}
+```
+
+## Returns
+
+`Promise<string | Uint8Array>` - The signature/token for authentication
+
+## Usage
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function SignInButton() {
+  const { signInWithWallet } = useAccount();
+
+  const handleSignIn = async () => {
+    try {
+      const token = await signInWithWallet();
+      console.log("Auth token:", token);
+    } catch (error) {
+      console.error("Sign in failed:", error);
+    }
+  };
+
+  return <button onClick={handleSignIn}>Sign In</button>;
+}
+```
+
+## Notes
+
+- This will show a modal/popup for the user to approve
+- The signature can be sent to your backend for authentication
+- Follows the SIW (Sign-In with Wallet) standard
+- Parameters are optional, defaults will be used if not provided
+
+## Errors
+
+- "Wallet not connected" - Wallet must be connected first
+- User rejection - User can reject the signing request

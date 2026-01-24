@@ -1,0 +1,49 @@
+diff --git a/dist/index-CgMq2-0F.js b/dist/index-CgMq2-0F.js
+index b0a24304e614aff556e906fb794b94855d365420..31111381811d3ce2e48c3b37918bb313134745f7 100644
+--- a/dist/index-CgMq2-0F.js
++++ b/dist/index-CgMq2-0F.js
+@@ -33092,7 +33092,7 @@ const c0 = (e, t, r = "Wallet is performing an action, please wait...") => {
+         } catch (I) {
+           console.warn("Failed to disconnect wagmi connector:", I);
+         }
+-      s?.isEmbeddedWallet && (await s?.logout?.(), o(Se.MyDogeSocialLogin)), a();
++      s?.isEmbeddedWallet && (await s?.logout?.(), o(Se.SocialLogin)), a();
+     } finally {
+       r((I) => ({ ...I, actionsLoading: !1 }));
+     }
+@@ -33696,7 +33696,7 @@ const c0 = (e, t, r = "Wallet is performing an action, please wait...") => {
+         return;
+       }
+       const { isAvailable: S, message: N, connectedInfo: W } = I || {};
+-      console.log("initEmbeddedWallet result: ", I), i(x), l(S || !1), u(N ?? null), f(W), m(!1), t(S ? Se.Logged : r), h(!0);
++      console.log("initEmbeddedWallet result: ", I), i(x), l(S || !1), u(N ?? null), f(W), m(!1), t(r), h(!0);
+     })();
+   }, [n]), oe(() => {
+     a && o && g && o.themeChange(a);
+@@ -34474,7 +34474,7 @@ const TI = ({ children: e, themeMode: t }) => {
+   console.log({
+     contextConfig: u
+   });
+-  const d = Se.MyDogeSocialLogin, f = j(() => {
++  const d = Se.SocialLogin, f = j(() => {
+     const z = t?.login;
+     if (!z) return !0;
+     const k = z.basicLogins && z.basicLogins.length > 0, M = z.socialLogins && z.socialLogins.length > 0;
+@@ -34511,7 +34511,7 @@ const TI = ({ children: e, themeMode: t }) => {
+     defaultMainView: d,
+     enabled: f,
+     defaultTheme: p
+-  }), I = QE(Se.MyDogeSocialLogin), S = K(() => {
++  }), I = QE(Se.SocialLogin), S = K(() => {
+     I.setView(a.isConnected ? Se.Account : r), I.openModal();
+   }, [I.setView, I.openModal, a.isConnected, r]), N = eI({
+     walletState: a,
+@@ -34663,7 +34663,7 @@ const TI = ({ children: e, themeMode: t }) => {
+     })()
+   }), null;
+ }, dB = ({ className: e, style: t }) => {
+-  const r = de(Le), n = r?.modal.mainView || Se.SocialLogin;
++  const r = de(Le), n = r?.connection?.isConnected ? Se.Account : r?.modal.mainView || Se.SocialLogin;
+   if (oe(() => {
+     r && r.modal.view !== n && r.modal.setView(n);
+   }, [n]), !r)

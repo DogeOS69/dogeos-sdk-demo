@@ -1,0 +1,145 @@
+# Quick Start
+
+## Overview
+
+Get started with DogeOS SDK in minutes. This guide will walk you through the basic setup and usage.
+
+## Installation
+
+```bash
+npm install @dogeos/dogeos-sdk
+```
+
+## Basic Setup
+
+### 1. Wrap your app with WalletConnectProvider
+
+```tsx
+import { WalletConnectProvider } from "@dogeos/dogeos-sdk";
+
+export default function App() {
+  return (
+    <WalletConnectProvider
+      config={{
+        clientId: "your-client-id",
+      }}
+    >
+      <YourApp />
+    </WalletConnectProvider>
+  );
+}
+```
+
+**Note:** `clientId` is required for embedded wallet functionality. Get your client ID from [DogeOS](https://sdk.dogeos.com/).
+
+### 2. Use the hooks
+
+The SDK provides two main hooks:
+
+- `useWalletConnect()` - For modal control and connection state
+- `useAccount()` - For account info and actions
+
+## Key Concepts
+
+- **Provider**: Wrap your app with `WalletConnectProvider` to enable wallet functionality
+- **Hooks**: Use `useWalletConnect` and `useAccount` to interact with wallets
+- **Modal**: The SDK provides a built-in wallet selection modal
+- **Connection State**: Track connection status with `isConnected`
+
+## Next Steps
+
+- Explore the `useWalletConnect` hook for connection management
+- Explore the `useAccount` hook for account information and signing
+- Check out the Provider documentation for chain-specific operations
+
+## Complete Example
+
+```tsx
+import React from "react";
+import {
+  WalletConnectProvider,
+  useWalletConnect,
+  useAccount,
+} from "@dogeos/dogeos-sdk";
+
+function WalletDemo() {
+  const { openModal, isConnected, disconnect } = useWalletConnect();
+  const { address, chainId, signMessage, signInWithWallet } = useAccount();
+
+  return (
+    <div>
+      {isConnected ? (
+        <div>
+          <div>Address: {address}</div>
+          <div>Chain ID: {chainId}</div>
+          <button onClick={() => signMessage?.({ message: "Hello" })}>
+            Sign Message
+          </button>
+          <button onClick={disconnect}>Disconnect</button>
+        </div>
+      ) : (
+        <button onClick={openModal}>Connect Wallet</button>
+      )}
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <WalletConnectProvider
+      config={{
+        clientId: "your-client-id",
+      }}
+    >
+      <WalletDemo />
+    </WalletConnectProvider>
+  );
+}
+```
+
+**Note:** Get your client ID from [DogeOS](https://sdk.dogeos.com/).
+
+## Connect Button Example
+
+```tsx
+import { useWalletConnect } from "@dogeos/dogeos-sdk";
+
+export function ConnectButton() {
+  const { openModal, isConnected, disconnect } = useWalletConnect();
+
+  return (
+    <button onClick={() => (isConnected ? disconnect() : openModal())}>
+      {isConnected ? "Disconnect" : "Connect Wallet"}
+    </button>
+  );
+}
+```
+
+## Account Info and Signing Example
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+export function AccountInfo() {
+  const { address, chainId, signMessage, signInWithWallet } = useAccount();
+
+  const onSignMessage = async () => {
+    const sig = await signMessage?.({ message: "Hello DogeOS" });
+    console.log("signature:", sig);
+  };
+
+  const onSignin = async () => {
+    const token = await signInWithWallet();
+    console.log("token:", token);
+  };
+
+  return (
+    <div>
+      <div>Address: {address}</div>
+      <div>ChainId: {chainId}</div>
+      <button onClick={onSignMessage}>Sign Message</button>
+      <button onClick={onSignin}>Sign In With Wallet</button>
+    </div>
+  );
+}
+```

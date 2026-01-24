@@ -1,0 +1,68 @@
+# currentProvider
+
+The provider object for the currently connected chain. This can be used to make RPC calls directly to the blockchain.
+
+## Property
+
+`currentProvider?: object`
+
+## Type
+
+`object | undefined` - Chain-specific provider object (varies by chain type)
+
+## Provider Types
+
+- **EVM**: EIP-1193 provider with `request()` method
+- **Dogecoin**: Dogecoin-specific provider
+
+## Usage
+
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+function ProviderExample() {
+  const { currentProvider, chainType, address } = useAccount();
+
+  const handleRpcCall = async () => {
+    if (!currentProvider || chainType !== "evm") {
+      console.log("Provider not available");
+      return;
+    }
+
+    try {
+      const result = await currentProvider.request({
+        method: "eth_blockNumber",
+        params: [],
+      });
+      console.log("Block number:", result);
+    } catch (error) {
+      console.error("RPC call failed:", error);
+    }
+  };
+
+  if (!address) {
+    return <div>Not connected</div>;
+  }
+
+  return (
+    <div>
+      <div>Provider: {currentProvider ? "Available" : "Not available"}</div>
+      <button onClick={handleRpcCall}>Get Block Number</button>
+    </div>
+  );
+}
+```
+
+## Notes
+
+- Returns `undefined` if wallet is not connected or provider is not available
+- Provider type depends on `chainType`
+- For EVM chains, provider follows EIP-1193 standard
+- Use `currentProvider.request()` for RPC calls
+- Provider may have additional chain-specific methods
+
+## Related Properties
+
+- `chainType` - Current chain type
+- `chainId` - Current chain ID
+- `address` - Wallet address

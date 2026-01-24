@@ -1,0 +1,59 @@
+# signMessage
+
+Signs a message with the connected wallet. This is used for message verification and authentication.
+
+<DocPageWithTabs
+  previewContent={
+    <SignMessagePreview />
+  }
+  codeContent={`import { useAccount } from "@dogeos/dogeos-sdk";
+
+function SignMessageButton() {
+  const { signMessage } = useAccount();
+
+  const onSignMessage = async () => {
+    if (!signMessage) return;
+    
+    try {
+      const sig = await signMessage({ message: "Hello DogeOS" });
+      console.log("signature:", sig);
+    } catch (error) {
+      console.error("Sign failed:", error);
+    }
+  };
+
+  return <button onClick={onSignMessage}>Sign Message</button>;
+}`}
+>
+
+## Method
+
+`signMessage(params)`
+
+## Parameters
+
+```typescript
+{
+  message: string; // Message to sign
+  nonce?: string; // Optional nonce for additional security
+}
+```
+
+## Returns
+
+`Promise<string | Uint8Array>` - The signature of the message
+
+## Notes
+
+- Requires wallet to be connected
+- The signature format depends on the chain type (EVM, Dogecoin, etc.)
+- For EVM chains, returns a hex string
+- For Dogecoin, returns a Uint8Array
+
+## Errors
+
+- "Wallet not connected" - Wallet must be connected first
+- "Message is required" - Message cannot be empty
+- User rejection - User can reject the signing request
+
+</DocPageWithTabs>

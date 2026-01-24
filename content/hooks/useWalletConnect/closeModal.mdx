@@ -1,0 +1,39 @@
+# closeModal
+
+Closes the wallet connection modal if it is currently open.
+
+## Method
+
+`closeModal()`
+
+## Parameters
+
+None
+
+## Returns
+
+`void` - No return value
+
+## Usage
+
+```tsx
+import { useWalletConnect } from "@dogeos/dogeos-sdk";
+
+function ModalControls() {
+  const { openModal, closeModal, isOpenModal } = useWalletConnect();
+
+  return (
+    <div>
+      <button onClick={openModal}>Open Modal</button>
+      {isOpenModal && (
+        <button onClick={closeModal}>Close Modal</button>
+      )}
+    </div>
+  );
+}
+```
+
+## Related Methods
+
+- `openModal()` - Opens the modal
+- `isOpenModal` - Boolean state indicating if modal is open
