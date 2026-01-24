@@ -455,7 +455,7 @@ export function HomePage({ configPanel, configCode }: HomePageProps) {
       </div>
 
       {/* Left: Config Panel - Takes small portion */}
-      <div className="flex-shrink-0 w-80 max-w-sm border-l" style={{ borderColor: isolatedColors.content2 }}>
+      <div className="flex-shrink-0 w-80 max-w-sm border-l h-full" style={{ borderColor: isolatedColors.content2 }}>
         {configPanel}
       </div>
     </div>

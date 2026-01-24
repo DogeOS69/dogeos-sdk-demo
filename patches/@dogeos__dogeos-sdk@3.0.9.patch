@@ -1,5 +1,5 @@
 diff --git a/dist/index-CgMq2-0F.js b/dist/index-CgMq2-0F.js
-index b0a24304e614aff556e906fb794b94855d365420..37807af169a9e479f2bd49a9f4e005195bf0756a 100644
+index b0a24304e614aff556e906fb794b94855d365420..31111381811d3ce2e48c3b37918bb313134745f7 100644
 --- a/dist/index-CgMq2-0F.js
 +++ b/dist/index-CgMq2-0F.js
 @@ -33092,7 +33092,7 @@ const c0 = (e, t, r = "Wallet is performing an action, please wait...") => {
@@ -38,3 +38,12 @@ index b0a24304e614aff556e906fb794b94855d365420..37807af169a9e479f2bd49a9f4e00519
      I.setView(a.isConnected ? Se.Account : r), I.openModal();
    }, [I.setView, I.openModal, a.isConnected, r]), N = eI({
      walletState: a,
+@@ -34663,7 +34663,7 @@ const TI = ({ children: e, themeMode: t }) => {
+     })()
+   }), null;
+ }, dB = ({ className: e, style: t }) => {
+-  const r = de(Le), n = r?.modal.mainView || Se.SocialLogin;
++  const r = de(Le), n = r?.connection?.isConnected ? Se.Account : r?.modal.mainView || Se.SocialLogin;
+   if (oe(() => {
+     r && r.modal.view !== n && r.modal.setView(n);
+   }, [n]), !r)

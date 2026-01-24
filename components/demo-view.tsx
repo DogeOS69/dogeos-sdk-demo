@@ -1,6 +1,6 @@
 "use client";
 
-import type { WalletConnectKitConfig } from "@dogeos/dogeos-sdk";
+import type { Chain, WalletConnectKitConfig } from "@dogeos/dogeos-sdk";
 import { useWalletConnect, WalletConnectProvider } from "@dogeos/dogeos-sdk";
 import { Button, useTheme } from "@tomo-inc/tomo-ui";
 import { useRouter } from "next/navigation";
@@ -222,7 +222,15 @@ export function DemoView() {
 
     const chains: WalletConnectKitConfig["chains"] = {};
     if (enableEvm) {
-      chains.evm = [mainnet, bsc, optimism, arbitrum, linea, base, polygon];
+      chains.evm = [
+        mainnet,
+        bsc,
+        optimism,
+        arbitrum,
+        linea,
+        base,
+        polygon,
+      ] as unknown as Chain[];
     }
     if (enableDogecoin) {
       (chains as Record<string, unknown>).dogecoin = recommonedChains.dogecoin;
@@ -712,7 +720,7 @@ function ConfigPanel({
 
   return (
     <div
-      className="w-full flex flex-col overflow-y-auto"
+      className="w-full h-full min-h-full flex flex-col overflow-y-auto"
       style={{
         backgroundColor: isolatedBackground,
         color: isolatedForeground,
