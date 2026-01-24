@@ -38,18 +38,103 @@ const recommonedChains = {
 export function DemoView() {
   const { theme } = useTheme();
   const [nextTheme, setNextTheme] = useState<string>("light");
+  const [hasHydratedConfig, setHasHydratedConfig] = useState(false);
   const [enableEmail, setEnableEmail] = useState(true);
   const [enableExternalWallets, setEnableExternalWallets] = useState(true);
   const [enableGoogle, setEnableGoogle] = useState(true);
   const [enableX, setEnableX] = useState(true);
-  const [primaryColor, setPrimaryColor] = useState("#FCD436");
-  const [primaryTextColor, setPrimaryTextColor] = useState("#12122A");
+  const [lightPrimaryColor, setLightPrimaryColor] = useState("#FCD436");
+  const [darkPrimaryColor, setDarkPrimaryColor] = useState("#FCD436");
+  const [lightPrimaryTextColor, setLightPrimaryTextColor] = useState("#12122A");
+  const [darkPrimaryTextColor, setDarkPrimaryTextColor] = useState("#12122A");
   const [lightBackgroundColor, setLightBackgroundColor] = useState("#FFF");
   const [lightForegroundColor, setLightForegroundColor] = useState("#000");
   const [darkBackgroundColor, setDarkBackgroundColor] = useState("#000");
   const [darkForegroundColor, setDarkForegroundColor] = useState("#FFF");
   const [enableEvm, setEnableEvm] = useState(true);
   const [enableDogecoin, setEnableDogecoin] = useState(true);
+
+  const handleSetTheme = (newTheme: string) => {
+    if (typeof window === "undefined") return;
+    const html = document.documentElement;
+    html.classList.remove("light", "dark");
+    html.classList.add(newTheme);
+    html.setAttribute("data-theme", newTheme);
+    setNextTheme(newTheme);
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const storedConfigRaw = localStorage.getItem("dogeos-sdk-demo-config");
+    if (!storedConfigRaw) {
+      setHasHydratedConfig(true);
+      return;
+    }
+
+    try {
+      const storedConfig = JSON.parse(storedConfigRaw) as Record<string, unknown>;
+      if (typeof storedConfig.enableEmail === "boolean") setEnableEmail(storedConfig.enableEmail);
+      if (typeof storedConfig.enableExternalWallets === "boolean") {
+        setEnableExternalWallets(storedConfig.enableExternalWallets);
+      }
+      if (typeof storedConfig.enableGoogle === "boolean") setEnableGoogle(storedConfig.enableGoogle);
+      if (typeof storedConfig.enableX === "boolean") setEnableX(storedConfig.enableX);
+      const storedLightPrimaryColor =
+        typeof storedConfig.lightPrimaryColor === "string"
+          ? storedConfig.lightPrimaryColor
+          : typeof storedConfig.primaryColor === "string"
+            ? storedConfig.primaryColor
+            : null;
+      if (storedLightPrimaryColor) setLightPrimaryColor(storedLightPrimaryColor);
+
+      const storedDarkPrimaryColor =
+        typeof storedConfig.darkPrimaryColor === "string"
+          ? storedConfig.darkPrimaryColor
+          : typeof storedConfig.primaryColor === "string"
+            ? storedConfig.primaryColor
+            : null;
+      if (storedDarkPrimaryColor) setDarkPrimaryColor(storedDarkPrimaryColor);
+
+      const storedLightPrimaryTextColor =
+        typeof storedConfig.lightPrimaryTextColor === "string"
+          ? storedConfig.lightPrimaryTextColor
+          : typeof storedConfig.primaryTextColor === "string"
+            ? storedConfig.primaryTextColor
+            : null;
+      if (storedLightPrimaryTextColor) setLightPrimaryTextColor(storedLightPrimaryTextColor);
+
+      const storedDarkPrimaryTextColor =
+        typeof storedConfig.darkPrimaryTextColor === "string"
+          ? storedConfig.darkPrimaryTextColor
+          : typeof storedConfig.primaryTextColor === "string"
+            ? storedConfig.primaryTextColor
+            : null;
+      if (storedDarkPrimaryTextColor) setDarkPrimaryTextColor(storedDarkPrimaryTextColor);
+      if (typeof storedConfig.lightBackgroundColor === "string") {
+        setLightBackgroundColor(storedConfig.lightBackgroundColor);
+      }
+      if (typeof storedConfig.lightForegroundColor === "string") {
+        setLightForegroundColor(storedConfig.lightForegroundColor);
+      }
+      if (typeof storedConfig.darkBackgroundColor === "string") {
+        setDarkBackgroundColor(storedConfig.darkBackgroundColor);
+      }
+      if (typeof storedConfig.darkForegroundColor === "string") {
+        setDarkForegroundColor(storedConfig.darkForegroundColor);
+      }
+      if (typeof storedConfig.enableEvm === "boolean") setEnableEvm(storedConfig.enableEvm);
+      if (typeof storedConfig.enableDogecoin === "boolean") {
+        setEnableDogecoin(storedConfig.enableDogecoin);
+      }
+      if (storedConfig.currentTheme === "light" || storedConfig.currentTheme === "dark") {
+        handleSetTheme(storedConfig.currentTheme);
+      }
+    } catch (error) {
+      console.warn("Failed to read stored config:", error);
+    } finally {
+      setHasHydratedConfig(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -87,14 +172,44 @@ export function DemoView() {
     };
   }, []);
 
-  const handleSetTheme = (newTheme: string) => {
-    if (typeof window === "undefined") return;
-    const html = document.documentElement;
-    html.classList.remove("light", "dark");
-    html.classList.add(newTheme);
-    html.setAttribute("data-theme", newTheme);
-    setNextTheme(newTheme);
-  };
+  useEffect(() => {
+    if (typeof window === "undefined" || !hasHydratedConfig) return;
+    const storedConfig = {
+      enableEmail,
+      enableExternalWallets,
+      enableGoogle,
+      enableX,
+      lightPrimaryColor,
+      darkPrimaryColor,
+      lightPrimaryTextColor,
+      darkPrimaryTextColor,
+      lightBackgroundColor,
+      lightForegroundColor,
+      darkBackgroundColor,
+      darkForegroundColor,
+      enableEvm,
+      enableDogecoin,
+      currentTheme: nextTheme,
+    };
+    localStorage.setItem("dogeos-sdk-demo-config", JSON.stringify(storedConfig));
+  }, [
+    hasHydratedConfig,
+    enableEmail,
+    enableExternalWallets,
+    enableGoogle,
+    enableX,
+    lightPrimaryColor,
+    darkPrimaryColor,
+    lightPrimaryTextColor,
+    darkPrimaryTextColor,
+    lightBackgroundColor,
+    lightForegroundColor,
+    darkBackgroundColor,
+    darkForegroundColor,
+    enableEvm,
+    enableDogecoin,
+    nextTheme,
+  ]);
 
   const config = useMemo((): WalletConnectKitConfig => {
     const basicLogins: BasicLoginType[] = [];
@@ -128,14 +243,14 @@ export function DemoView() {
               background: lightBackgroundColor,
               content1: "#FCFCFD",
               primary: {
-                DEFAULT: primaryColor,
-                foreground: primaryTextColor,
+                DEFAULT: lightPrimaryColor,
+                foreground: lightPrimaryTextColor,
                 50: "#F8F7F7",
                 100: "#F2EDF0",
                 200: "#E8D9E0",
                 300: "#DDB0C7",
                 400: "#DE7CAD",
-                500: primaryColor,
+                500: lightPrimaryColor,
                 600: "#FF0A85",
                 700: "#D6006B",
                 800: "#A30052",
@@ -149,14 +264,14 @@ export function DemoView() {
               background: darkBackgroundColor,
               content1: "#1A1A1A",
               primary: {
-                DEFAULT: primaryColor,
-                foreground: primaryTextColor,
+                DEFAULT: darkPrimaryColor,
+                foreground: darkPrimaryTextColor,
                 50: "#700038",
                 100: "#A30052",
                 200: "#D6006B",
                 300: "#FF0A85",
-                400: primaryColor,
-                500: primaryColor,
+                400: darkPrimaryColor,
+                500: darkPrimaryColor,
                 600: "#FF0A85",
                 700: "#D6006B",
                 800: "#A30052",
@@ -176,8 +291,10 @@ export function DemoView() {
     enableExternalWallets,
     enableGoogle,
     enableX,
-    primaryColor,
-    primaryTextColor,
+    lightPrimaryColor,
+    darkPrimaryColor,
+    lightPrimaryTextColor,
+    darkPrimaryTextColor,
     lightBackgroundColor,
     lightForegroundColor,
     darkBackgroundColor,
@@ -222,14 +339,14 @@ export function DemoView() {
               background: lightBackgroundColor,
               content1: "#FCFCFD",
               primary: {
-                DEFAULT: primaryColor,
-                foreground: primaryTextColor,
+                DEFAULT: lightPrimaryColor,
+                foreground: lightPrimaryTextColor,
                 50: "#F8F7F7",
                 100: "#F2EDF0",
                 200: "#E8D9E0",
                 300: "#DDB0C7",
                 400: "#DE7CAD",
-                500: primaryColor,
+                500: lightPrimaryColor,
                 600: "#FF0A85",
                 700: "#D6006B",
                 800: "#A30052",
@@ -243,14 +360,14 @@ export function DemoView() {
               background: darkBackgroundColor,
               content1: "#1A1A1A",
               primary: {
-                DEFAULT: primaryColor,
-                foreground: primaryTextColor,
+                DEFAULT: darkPrimaryColor,
+                foreground: darkPrimaryTextColor,
                 50: "#700038",
                 100: "#A30052",
                 200: "#D6006B",
                 300: "#FF0A85",
-                400: primaryColor,
-                500: primaryColor,
+                400: darkPrimaryColor,
+                500: darkPrimaryColor,
                 600: "#FF0A85",
                 700: "#D6006B",
                 800: "#A30052",
@@ -324,8 +441,10 @@ App metadata for WalletConnect
     enableExternalWallets,
     enableGoogle,
     enableX,
-    primaryColor,
-    primaryTextColor,
+    lightPrimaryColor,
+    darkPrimaryColor,
+    lightPrimaryTextColor,
+    darkPrimaryTextColor,
     lightBackgroundColor,
     lightForegroundColor,
     darkBackgroundColor,
@@ -351,10 +470,14 @@ App metadata for WalletConnect
             setEnableExternalWallets={setEnableExternalWallets}
             setEnableGoogle={setEnableGoogle}
             setEnableX={setEnableX}
-            primaryColor={primaryColor}
-            setPrimaryColor={setPrimaryColor}
-            primaryTextColor={primaryTextColor}
-            setPrimaryTextColor={setPrimaryTextColor}
+            lightPrimaryColor={lightPrimaryColor}
+            setLightPrimaryColor={setLightPrimaryColor}
+            darkPrimaryColor={darkPrimaryColor}
+            setDarkPrimaryColor={setDarkPrimaryColor}
+            lightPrimaryTextColor={lightPrimaryTextColor}
+            setLightPrimaryTextColor={setLightPrimaryTextColor}
+            darkPrimaryTextColor={darkPrimaryTextColor}
+            setDarkPrimaryTextColor={setDarkPrimaryTextColor}
             lightBackgroundColor={lightBackgroundColor}
             setLightBackgroundColor={setLightBackgroundColor}
             lightForegroundColor={lightForegroundColor}
@@ -406,10 +529,14 @@ interface WalletDemoProps {
   setEnableExternalWallets: (value: boolean) => void;
   setEnableGoogle: (value: boolean) => void;
   setEnableX: (value: boolean) => void;
-  primaryColor: string;
-  setPrimaryColor: (value: string) => void;
-  primaryTextColor: string;
-  setPrimaryTextColor: (value: string) => void;
+  lightPrimaryColor: string;
+  setLightPrimaryColor: (value: string) => void;
+  darkPrimaryColor: string;
+  setDarkPrimaryColor: (value: string) => void;
+  lightPrimaryTextColor: string;
+  setLightPrimaryTextColor: (value: string) => void;
+  darkPrimaryTextColor: string;
+  setDarkPrimaryTextColor: (value: string) => void;
   lightBackgroundColor: string;
   setLightBackgroundColor: (value: string) => void;
   lightForegroundColor: string;
@@ -436,10 +563,14 @@ function WalletDemo({
   setEnableExternalWallets,
   setEnableGoogle,
   setEnableX,
-  primaryColor,
-  setPrimaryColor,
-  primaryTextColor,
-  setPrimaryTextColor,
+  lightPrimaryColor,
+  setLightPrimaryColor,
+  darkPrimaryColor,
+  setDarkPrimaryColor,
+  lightPrimaryTextColor,
+  setLightPrimaryTextColor,
+  darkPrimaryTextColor,
+  setDarkPrimaryTextColor,
   lightBackgroundColor,
   setLightBackgroundColor,
   lightForegroundColor,
@@ -466,10 +597,14 @@ function WalletDemo({
       setEnableGoogle={setEnableGoogle}
       enableX={enableX}
       setEnableX={setEnableX}
-      primaryColor={primaryColor}
-      setPrimaryColor={setPrimaryColor}
-      primaryTextColor={primaryTextColor}
-      setPrimaryTextColor={setPrimaryTextColor}
+      lightPrimaryColor={lightPrimaryColor}
+      setLightPrimaryColor={setLightPrimaryColor}
+      darkPrimaryColor={darkPrimaryColor}
+      setDarkPrimaryColor={setDarkPrimaryColor}
+      lightPrimaryTextColor={lightPrimaryTextColor}
+      setLightPrimaryTextColor={setLightPrimaryTextColor}
+      darkPrimaryTextColor={darkPrimaryTextColor}
+      setDarkPrimaryTextColor={setDarkPrimaryTextColor}
       lightBackgroundColor={lightBackgroundColor}
       setLightBackgroundColor={setLightBackgroundColor}
       lightForegroundColor={lightForegroundColor}
@@ -499,10 +634,14 @@ interface ConfigPanelProps {
   setEnableGoogle: (value: boolean) => void;
   enableX: boolean;
   setEnableX: (value: boolean) => void;
-  primaryColor: string;
-  setPrimaryColor: (value: string) => void;
-  primaryTextColor: string;
-  setPrimaryTextColor: (value: string) => void;
+  lightPrimaryColor: string;
+  setLightPrimaryColor: (value: string) => void;
+  darkPrimaryColor: string;
+  setDarkPrimaryColor: (value: string) => void;
+  lightPrimaryTextColor: string;
+  setLightPrimaryTextColor: (value: string) => void;
+  darkPrimaryTextColor: string;
+  setDarkPrimaryTextColor: (value: string) => void;
   lightBackgroundColor: string;
   setLightBackgroundColor: (value: string) => void;
   lightForegroundColor: string;
@@ -530,10 +669,14 @@ function ConfigPanel({
   setEnableGoogle,
   enableX,
   setEnableX,
-  primaryColor,
-  setPrimaryColor,
-  primaryTextColor,
-  setPrimaryTextColor,
+  lightPrimaryColor,
+  setLightPrimaryColor,
+  darkPrimaryColor,
+  setDarkPrimaryColor,
+  lightPrimaryTextColor,
+  setLightPrimaryTextColor,
+  darkPrimaryTextColor,
+  setDarkPrimaryTextColor,
   lightBackgroundColor,
   setLightBackgroundColor,
   lightForegroundColor,
@@ -562,6 +705,10 @@ function ConfigPanel({
   const isolatedForegroundMuted = isDark ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.7)";
   const isolatedForegroundSubtle = isDark ? "rgba(255, 255, 255, 0.6)" : "rgba(0, 0, 0, 0.6)";
   const isolatedContent2 = isDark ? "#27272A" : "#E4E4E7";
+  const activePrimaryColor = isDark ? darkPrimaryColor : lightPrimaryColor;
+  const activePrimaryTextColor = isDark ? darkPrimaryTextColor : lightPrimaryTextColor;
+  const lightButtonTextColor = currentTheme === "light" ? lightPrimaryTextColor : isolatedForeground;
+  const darkButtonTextColor = currentTheme === "dark" ? darkPrimaryTextColor : isolatedForeground;
 
   return (
     <div
@@ -614,7 +761,7 @@ function ConfigPanel({
                     size="sm"
                     className="flex-1"
                     style={{
-                      color: currentTheme === "light" ? "#FFFFFF" : undefined,
+                      color: lightButtonTextColor,
                     }}
                   >
                     Light
@@ -626,7 +773,7 @@ function ConfigPanel({
                     size="sm"
                     className="flex-1"
                     style={{
-                      color: currentTheme === "dark" ? "#FFFFFF" : undefined,
+                      color: darkButtonTextColor,
                     }}
                   >
                     Dark
@@ -645,8 +792,14 @@ function ConfigPanel({
                 <div className="flex items-center gap-2 mb-1">
                   <input
                     type="text"
-                    value={primaryColor}
-                    onChange={(e) => setPrimaryColor(e.target.value)}
+                    value={activePrimaryColor}
+                    onChange={(e) => {
+                      if (isDark) {
+                        setDarkPrimaryColor(e.target.value);
+                      } else {
+                        setLightPrimaryColor(e.target.value);
+                      }
+                    }}
                     className="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     style={{
                       backgroundColor: isolatedBackground,
@@ -658,8 +811,14 @@ function ConfigPanel({
                   <div className="relative">
                     <input
                       type="color"
-                      value={primaryColor}
-                      onChange={(e) => setPrimaryColor(e.target.value)}
+                      value={activePrimaryColor}
+                      onChange={(e) => {
+                        if (isDark) {
+                          setDarkPrimaryColor(e.target.value);
+                        } else {
+                          setLightPrimaryColor(e.target.value);
+                        }
+                      }}
                       className="w-10 h-10 rounded-lg p-1 cursor-pointer border"
                       style={{ borderColor: isolatedContent2 }}
                     />
@@ -678,8 +837,14 @@ function ConfigPanel({
                 <div className="flex items-center gap-2 mb-1">
                   <input
                     type="text"
-                    value={primaryTextColor}
-                    onChange={(e) => setPrimaryTextColor(e.target.value)}
+                    value={activePrimaryTextColor}
+                    onChange={(e) => {
+                      if (isDark) {
+                        setDarkPrimaryTextColor(e.target.value);
+                      } else {
+                        setLightPrimaryTextColor(e.target.value);
+                      }
+                    }}
                     className="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                     style={{
                       backgroundColor: isolatedBackground,
@@ -691,8 +856,14 @@ function ConfigPanel({
                   <div className="relative">
                     <input
                       type="color"
-                      value={primaryTextColor}
-                      onChange={(e) => setPrimaryTextColor(e.target.value)}
+                      value={activePrimaryTextColor}
+                      onChange={(e) => {
+                        if (isDark) {
+                          setDarkPrimaryTextColor(e.target.value);
+                        } else {
+                          setLightPrimaryTextColor(e.target.value);
+                        }
+                      }}
                       className="w-10 h-10 rounded-lg p-1 cursor-pointer border"
                       style={{ borderColor: isolatedContent2 }}
                     />

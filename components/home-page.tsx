@@ -4,6 +4,7 @@ import { WalletConnectEmbed } from "@dogeos/dogeos-sdk";
 import { Button } from "@tomo-inc/tomo-ui";
 import React, { useState } from "react";
 import { MarkdownRenderer } from "./markdown-renderer";
+import { SdkTests } from "./sdk-tests";
 
 // 图标组件 - 使用 CDN 资源
 const Ethereum = ({ className }: { className?: string }) => (
@@ -411,7 +412,7 @@ export function HomePage({ configPanel, configCode }: HomePageProps) {
       content: (
         <div className="p-4">
           <div className="flex flex-1 items-center justify-center min-h-[400px]">
-            <WalletConnectEmbed className="shadow-lg" />
+            <WalletPreview />
           </div>
         </div>
       ),
@@ -422,6 +423,15 @@ export function HomePage({ configPanel, configCode }: HomePageProps) {
       content: (
         <div className="p-4 overflow-auto">
           <MarkdownRenderer content={configCode} />
+        </div>
+      ),
+    },
+    {
+      key: "tests",
+      label: "Tests",
+      content: (
+        <div className="p-4 overflow-auto">
+          <SdkTests />
         </div>
       ),
     },
@@ -450,4 +460,8 @@ export function HomePage({ configPanel, configCode }: HomePageProps) {
       </div>
     </div>
   );
+}
+
+function WalletPreview() {
+  return <WalletConnectEmbed className="shadow-lg" />;
 }
