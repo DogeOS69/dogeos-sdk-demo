@@ -451,9 +451,12 @@ export function SdkTests() {
 
   return (
     <div className="max-w-5xl mx-auto text-foreground">
-      <div className="grid gap-6" style={{ gridTemplateColumns: "2fr 1fr" }}>
+      <div
+        className="grid gap-6"
+        style={{ gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)" }}
+      >
         {/* Left Column - All Test Widgets */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <div className="min-w-0" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           {/* Status Cards */}
           <div className="flex flex-wrap gap-2">
             <div className="rounded-lg border border-content2 bg-content1 px-3 py-2">
@@ -472,12 +475,6 @@ export function SdkTests() {
               <div className="text-[10px] font-medium text-foreground/60 mb-0.5">Balance</div>
               <div className="text-xs font-medium">{balance ?? "—"}</div>
             </div>
-            {error && (
-              <div className="rounded-lg border border-danger bg-danger/10 px-3 py-2">
-                <div className="text-[10px] font-medium text-danger mb-0.5">Error</div>
-                <div className="text-xs text-danger">{error}</div>
-              </div>
-            )}
           </div>
 
           <section className="rounded-lg border border-content2 p-4 space-y-3">
@@ -749,7 +746,7 @@ export function SdkTests() {
         </div>
 
         {/* Test Output Panel */}
-        <div className="h-fit sticky top-4">
+        <div className="h-fit sticky top-4 w-full max-w-sm justify-self-end min-w-0">
           <section className="rounded-lg border border-content2 p-4 space-y-3 max-h-[calc(100vh-120px)] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between flex-shrink-0">
               <div>

@@ -1,2 +1,0 @@
-patchedDependencies:
-  '@dogeos/dogeos-sdk@3.0.9': patches/@dogeos__dogeos-sdk@3.0.9.patch

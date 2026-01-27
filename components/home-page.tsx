@@ -1,8 +1,9 @@
 "use client";
 
-import { WalletConnectEmbed } from "@dogeos/dogeos-sdk";
+import { useAccount, useWalletConnect, WalletConnectEmbed } from "@dogeos/dogeos-sdk";
 import { Button } from "@tomo-inc/tomo-ui";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { AddressDisplay } from "./address-display";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { SdkTests } from "./sdk-tests";
 
@@ -463,5 +464,70 @@ export function HomePage({ configPanel, configCode }: HomePageProps) {
 }
 
 function WalletPreview() {
-  return <WalletConnectEmbed className="shadow-lg" />;
+  const { address, chainId, chainType, balance, currentWallet } = useAccount();
+  const { isConnected, openModal, disconnect } = useWalletConnect();
+
+  const formatChainLabel = () => {
+    if (!chainType && (chainId === null || chainId === undefined)) return "—";
+    if (!chainType) return `Chain ${chainId}`;
+    if (chainId === null || chainId === undefined) return chainType.toUpperCase();
+    return `${chainType.toUpperCase()} · ${chainId}`;
+  };
+
+  if (!isConnected || !address) {
+    return <WalletConnectEmbed className="shadow-lg" />;
+  }
+
+  const walletName = currentWallet?.info?.name ?? "Connected wallet";
+
+  return (
+    <div className="w-full max-w-lg">
+      <div className="relative overflow-hidden rounded-2xl border border-content2 bg-content1/80 p-6 shadow-xl">
+        <div className="pointer-events-none absolute -right-20 -top-24 h-40 w-40 rounded-full bg-primary/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-24 h-40 w-40 rounded-full bg-secondary/10 blur-3xl" />
+
+        <div className="relative flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.3em] text-foreground/40">Connected</p>
+            <h3 className="mt-2 text-lg font-semibold text-foreground">Account overview</h3>
+            <p className="mt-1 text-xs text-foreground/60">Manage your active wallet and network.</p>
+          </div>
+          <Button size="sm" variant="light" onPress={openModal}>
+            Open modal
+          </Button>
+        </div>
+
+        <div className="relative mt-6 flex items-center gap-4 rounded-xl border border-content2 bg-background/60 px-4 py-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20 text-sm font-semibold text-foreground">
+            {address.slice(2, 4).toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs text-foreground/60">Active account</div>
+            <AddressDisplay address={address} className="mt-1" />
+            <div className="mt-1 text-xs text-foreground/50">{walletName}</div>
+          </div>
+        </div>
+
+        <div className="relative mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-content2 bg-background/60 p-3">
+            <div className="text-xs text-foreground/50">Network</div>
+            <div className="mt-1 text-sm font-medium text-foreground">{formatChainLabel()}</div>
+          </div>
+          <div className="rounded-xl border border-content2 bg-background/60 p-3">
+            <div className="text-xs text-foreground/50">Balance</div>
+            <div className="mt-1 text-sm font-medium text-foreground">{balance ?? "—"}</div>
+          </div>
+        </div>
+
+        <div className="relative mt-6 flex flex-wrap gap-2">
+          <Button size="sm" variant="bordered" onPress={openModal}>
+            Manage connection
+          </Button>
+          <Button size="sm" color="primary" onPress={disconnect}>
+            Disconnect
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 }
