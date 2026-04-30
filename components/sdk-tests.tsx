@@ -1,7 +1,7 @@
 "use client";
 
 import type { Chain } from "@dogeos/dogeos-sdk";
-import { getChains, getConnectors, useAccount, useWalletConnect } from "@dogeos/dogeos-sdk";
+import { ChainTypeEnum, getChains, getConnectors, useAccount, useWalletConnect } from "@dogeos/dogeos-sdk";
 import { Button } from "@tomo-inc/tomo-ui";
 import { useState } from "react";
 import { polygon } from "viem/chains";
@@ -211,7 +211,7 @@ export function SdkTests() {
       if (!selectedChain) {
         throw new Error(`Chain ${selectedSwitchChainId} not found in available chains.`);
       }
-      return switchChain({ chainType: "evm", chainInfo: selectedChain });
+      return switchChain({ chainType: ChainTypeEnum.EVM, chainInfo: selectedChain });
     });
   };
 
@@ -220,7 +220,7 @@ export function SdkTests() {
       if (!currentWallet) {
         throw new Error("No wallet connected. Connect a wallet first.");
       }
-      return connect({ wallet: currentWallet, chainType: "dogecoin" });
+      return connect({ wallet: currentWallet, chainType: ChainTypeEnum.DOGECOIN });
     });
   };
 
@@ -229,7 +229,7 @@ export function SdkTests() {
       if (!currentWallet) {
         throw new Error("No wallet connected. Connect a wallet first.");
       }
-      return connect({ wallet: currentWallet, chainType: "evm" });
+      return connect({ wallet: currentWallet, chainType: ChainTypeEnum.EVM });
     });
   };
 
