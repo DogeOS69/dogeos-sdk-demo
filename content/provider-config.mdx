@@ -10,7 +10,7 @@ interface WalletConnectKitConfig {
   chains?: Awaited<GetChainsReturnType>;
   defaultConnectChain?: ChainType;
   walletConnectProjectId?: string;
-  clientId?: string;
+  clientId: string;
   metadata?: {
     name: string;
     description: string;
@@ -19,6 +19,9 @@ interface WalletConnectKitConfig {
   };
   theme?: ThemeConfig;
   login?: UserLoginConfig;
+  embeddedWalletConfig?: {
+    stage?: EmbeddedWalletStage;
+  };
 }
 ```
 
@@ -53,7 +56,7 @@ function App() {
 
 ### chains
 
-Chain configuration for supported blockchains. Must be obtained through `getChains()` method, cannot be passed directly.
+Chain configuration for supported blockchains. You can provide explicit chain arrays or hydrate the defaults with `getChains()`.
 
 **Type:** `Awaited<GetChainsReturnType>`
 
@@ -289,6 +292,7 @@ type BasicLoginType = "email" | "externalWallets";
 
 type SocialLoginProvider = {
   type: "google" | "x";
+  clientId?: string;
 };
 ```
 
@@ -307,9 +311,11 @@ const config = {
     socialLogins: [
       {
         type: "google",
+        clientId: "your-google-client-id",
       },
       {
         type: "x",
+        clientId: "your-x-client-id",
       },
     ],
   },
@@ -390,8 +396,8 @@ export function App() {
     login: {
       basicLogins: ["email", "externalWallets"],
       socialLogins: [
-        { type: "google" },
-        { type: "x" },
+        { type: "google", clientId: "your-google-client-id" },
+        { type: "x", clientId: "your-x-client-id" },
       ],
     },
   };

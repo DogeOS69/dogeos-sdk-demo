@@ -6,6 +6,7 @@ import { Button, useTheme } from "@tomo-inc/tomo-ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { arbitrum, base, bsc, linea, mainnet, optimism, polygon } from "viem/chains";
+import { DOGEOS_DEMO_ICON_URL, dogeOSTestnet, getDogeOSDemoMetadata } from "./dogeos-testnet";
 import { HomePage } from "./home-page";
 
 const Ethereum = ({ className }: { className?: string }) => (
@@ -234,6 +235,7 @@ export function DemoView() {
     const chains: WalletConnectKitConfig["chains"] = {};
     if (enableEvm) {
       chains.evm = [
+        dogeOSTestnet,
         mainnet,
         bsc,
         optimism,
@@ -304,6 +306,7 @@ export function DemoView() {
       },
       defaultConnectChain: ChainTypeEnum.EVM,
       walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
+      metadata: getDogeOSDemoMetadata(),
     };
   }, [
     theme,
@@ -334,7 +337,16 @@ export function DemoView() {
 
     const chainsConfig: Record<string, unknown> = {};
     if (enableEvm) {
-      chainsConfig.evm = [mainnet, bsc, optimism, arbitrum, linea, base, polygon].map((chain) => ({
+      chainsConfig.evm = [
+        dogeOSTestnet,
+        mainnet,
+        bsc,
+        optimism,
+        arbitrum,
+        linea,
+        base,
+        polygon,
+      ].map((chain) => ({
         id: chain.id,
         name: chain.name,
         nativeCurrency: chain.nativeCurrency,
@@ -403,9 +415,7 @@ export function DemoView() {
         name: "Wallet Connect Demo",
         description: "Wallet Connect Demo",
         url: "https://www.mydoge.com",
-        icons: ["/imgs/dogeos.svg"],
-        terms: "https://www.mydoge.com/terms",
-        privacyPolicy: "https://www.mydoge.com/privacy",
+        icons: [DOGEOS_DEMO_ICON_URL],
       },
     };
 
@@ -453,8 +463,6 @@ App metadata for WalletConnect
 - **description**: App description
 - **url**: App URL
 - **icons**: Array of icon URLs
-- **terms**: Terms of service URL
-- **privacyPolicy**: Privacy policy URL
 `;
   }, [
     enableEmail,
