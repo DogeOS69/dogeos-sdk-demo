@@ -1,14 +1,14 @@
 # error
 
-Error object if an error occurred during connection or other wallet operations.
+Error message if an error occurred during connection or other wallet operations.
 
 ## Property
 
-`error: Error | null`
+`error: string`
 
 ## Type
 
-`Error | null` - Error object if an error occurred, `null` otherwise
+`string` - Error message if an error occurred, empty string otherwise
 
 ## Usage
 
@@ -21,7 +21,7 @@ function ConnectionStatus() {
   if (error) {
     return (
       <div>
-        <p>Error: {error.message}</p>
+        <p>Error: {error}</p>
         <button onClick={openModal}>Try Again</button>
       </div>
     );
@@ -37,7 +37,7 @@ function ConnectionStatus() {
 
 ## Notes
 
-- Returns `null` if no error has occurred
+- Returns an empty string if no error has occurred
 - Error is cleared when a new connection attempt is made
 - Common errors include:
   - User rejection

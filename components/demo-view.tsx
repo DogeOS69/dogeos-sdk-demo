@@ -1,11 +1,12 @@
 "use client";
 
 import type { Chain, WalletConnectKitConfig } from "@dogeos/dogeos-sdk";
-import { useWalletConnect, WalletConnectProvider } from "@dogeos/dogeos-sdk";
+import { ChainTypeEnum, useWalletConnect, WalletConnectProvider } from "@dogeos/dogeos-sdk";
 import { Button, useTheme } from "@tomo-inc/tomo-ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { arbitrum, base, bsc, linea, mainnet, optimism, polygon } from "viem/chains";
+import { DOGEOS_DEMO_ICON_URL, dogeOSTestnet, getDogeOSDemoMetadata } from "./dogeos-testnet";
 import { HomePage } from "./home-page";
 
 const Ethereum = ({ className }: { className?: string }) => (
@@ -26,6 +27,17 @@ const Doge = ({ className }: { className?: string }) => (
 
 type BasicLoginType = "email" | "externalWallets";
 type SocialLoginType = "google" | "x";
+
+const DOGEOS_CLIENT_ID =
+  process.env.NEXT_PUBLIC_DOGEOS_CLIENT_ID ??
+  "mSzQLiebxpwV64barnRZpCGZTwB38kSiuszi42Cqq41fkRH8KM99dqG4pFNnvaVA4DV7zHsic0or0pd8tlMIt9vc";
+const DOGEOS_GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_DOGEOS_GOOGLE_CLIENT_ID ??
+  "362812706401-eppkpnqocdaejaf45ics815t22oe0j7l.apps.googleusercontent.com";
+const DOGEOS_X_CLIENT_ID =
+  process.env.NEXT_PUBLIC_DOGEOS_X_CLIENT_ID ?? "cTQxTUlSZXhwOXF6T2hnTHJVRzI6MTpjaQ";
+const WALLETCONNECT_PROJECT_ID =
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "44cb8a6aedbe379ba8f2fa4fbc1a461f";
 
 const recommonedChains = {
   dogecoin: [
@@ -217,12 +229,13 @@ export function DemoView() {
     if (enableExternalWallets) basicLogins.push("externalWallets");
 
     const socialLogins: Array<{ type: SocialLoginType; clientId?: string }> = [];
-    if (enableGoogle) socialLogins.push({ type: "google" });
-    if (enableX) socialLogins.push({ type: "x" });
+    if (enableGoogle) socialLogins.push({ type: "google", clientId: DOGEOS_GOOGLE_CLIENT_ID });
+    if (enableX) socialLogins.push({ type: "x", clientId: DOGEOS_X_CLIENT_ID });
 
     const chains: WalletConnectKitConfig["chains"] = {};
     if (enableEvm) {
       chains.evm = [
+        dogeOSTestnet,
         mainnet,
         bsc,
         optimism,
@@ -237,6 +250,7 @@ export function DemoView() {
     }
 
     return {
+      clientId: DOGEOS_CLIENT_ID,
       chains,
       login: {
         basicLogins,
@@ -290,8 +304,9 @@ export function DemoView() {
         },
         defaultTheme: theme === "dark" ? ("dark" as const) : ("light" as const),
       },
-      defaultConnectChain: "evm",
-      walletConnectProjectId: "44cb8a6aedbe379ba8f2fa4fbc1a461f",
+      defaultConnectChain: ChainTypeEnum.EVM,
+      walletConnectProjectId: WALLETCONNECT_PROJECT_ID,
+      metadata: getDogeOSDemoMetadata(),
     };
   }, [
     theme,
@@ -316,13 +331,22 @@ export function DemoView() {
     if (enableEmail) basicLogins.push("email");
     if (enableExternalWallets) basicLogins.push("externalWallets");
 
-    const socialLogins: Array<{ type: SocialLoginType }> = [];
-    if (enableGoogle) socialLogins.push({ type: "google" });
-    if (enableX) socialLogins.push({ type: "x" });
+    const socialLogins: Array<{ type: SocialLoginType; clientId: string }> = [];
+    if (enableGoogle) socialLogins.push({ type: "google", clientId: "YOUR_GOOGLE_CLIENT_ID" });
+    if (enableX) socialLogins.push({ type: "x", clientId: "YOUR_X_CLIENT_ID" });
 
     const chainsConfig: Record<string, unknown> = {};
     if (enableEvm) {
-      chainsConfig.evm = [mainnet, bsc, optimism, arbitrum, linea, base, polygon].map((chain) => ({
+      chainsConfig.evm = [
+        dogeOSTestnet,
+        mainnet,
+        bsc,
+        optimism,
+        arbitrum,
+        linea,
+        base,
+        polygon,
+      ].map((chain) => ({
         id: chain.id,
         name: chain.name,
         nativeCurrency: chain.nativeCurrency,
@@ -385,15 +409,13 @@ export function DemoView() {
           },
         },
       },
-      walletConnectProjectId: "44cb8a6aedbe379ba8f2fa4fbc1a461f",
-      clientId: "YOUR_CLIENT_ID",
+      walletConnectProjectId: "YOUR_WALLETCONNECT_PROJECT_ID",
+      clientId: "YOUR_DOGEOS_CLIENT_ID",
       metadata: {
         name: "Wallet Connect Demo",
         description: "Wallet Connect Demo",
         url: "https://www.mydoge.com",
-        icons: ["/imgs/dogeos.svg"],
-        terms: "https://www.mydoge.com/terms",
-        privacyPolicy: "https://www.mydoge.com/privacy",
+        icons: [DOGEOS_DEMO_ICON_URL],
       },
     };
 
@@ -415,7 +437,7 @@ ${jsonString}
 
 ### login
 - **basicLogins**: Array of basic login methods (\`"email"\`, \`"externalWallets"\`)
-- **socialLogins**: Array of social login providers (\`{ type: "google" }\`, \`{ type: "x" }\`)
+- **socialLogins**: Array of social login providers with provider client IDs
 
 ### theme
 - **prefix**: CSS prefix for theme classes (default: \`"heroui"\`)
@@ -441,8 +463,6 @@ App metadata for WalletConnect
 - **description**: App description
 - **url**: App URL
 - **icons**: Array of icon URLs
-- **terms**: Terms of service URL
-- **privacyPolicy**: Privacy policy URL
 `;
   }, [
     enableEmail,

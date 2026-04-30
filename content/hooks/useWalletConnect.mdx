@@ -165,9 +165,39 @@ Boolean indicating whether the connection modal is open.
 
 ### error
 
-Error object if an error occurred during connection.
+Error message if an error occurred during connection.
 
-**Type:** `Error | null`
+**Type:** `string`
+
+### connectionStatus
+
+Current connection lifecycle state.
+
+**Type:** `"disconnected" | "connecting" | "connected"`
+
+### isDisconnected
+
+Boolean indicating whether no wallet is currently connected.
+
+**Type:** `boolean`
+
+### walletStatus
+
+Current embedded wallet readiness state.
+
+**Type:** `"disabled" | "initializing" | "ready" | "unavailable" | "error"`
+
+### isWalletReady
+
+Boolean indicating whether the embedded wallet is ready for use.
+
+**Type:** `boolean`
+
+### isWalletLoading
+
+Boolean indicating whether the embedded wallet is still initializing.
+
+**Type:** `boolean`
 
 ## Complete Example
 
@@ -185,6 +215,9 @@ export function WalletConnection() {
     isConnecting,
     isOpenModal,
     error,
+    connectionStatus,
+    walletStatus,
+    isWalletReady,
   } = useWalletConnect();
 
   if (isConnecting) {
@@ -194,7 +227,7 @@ export function WalletConnection() {
   if (error) {
     return (
       <div>
-        <p>Error: {error.message}</p>
+        <p>Error: {error}</p>
         <button onClick={openModal}>Try Again</button>
       </div>
     );
@@ -202,6 +235,9 @@ export function WalletConnection() {
 
   return (
     <div>
+      <div>Status: {connectionStatus}</div>
+      <div>Wallet: {walletStatus}</div>
+      <div>Ready: {isWalletReady ? "Yes" : "No"}</div>
       {isConnected ? (
         <button onClick={disconnect}>Disconnect</button>
       ) : (

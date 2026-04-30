@@ -127,9 +127,7 @@ Signs a message with the connected Dogecoin wallet.
 **Parameters:**
 
 ```typescript
-{
-  message: string; // Message to sign
-}
+message: string // Message to sign
 ```
 
 **Returns:** `Promise<string>` - Signature
@@ -146,9 +144,7 @@ function SignMessage() {
     if (!currentProvider) return;
     
     try {
-      const signature = await currentProvider.signMessage({
-        message: "Hello Dogecoin",
-      });
+      const signature = await currentProvider.signMessage("Hello Dogecoin");
       console.log("Signature:", signature);
     } catch (error) {
       console.error("Failed:", error);
@@ -159,16 +155,14 @@ function SignMessage() {
 }
 ```
 
-### signPSBT()
+### signPsbt()
 
 Signs a Partially Signed Bitcoin Transaction (PSBT) for Dogecoin.
 
 **Parameters:**
 
 ```typescript
-{
-  psbt: string; // PSBT hex string
-}
+psbt: string // PSBT hex string
 ```
 
 **Returns:** `Promise<string>` - Signed PSBT
@@ -178,23 +172,21 @@ Signs a Partially Signed Bitcoin Transaction (PSBT) for Dogecoin.
 ```tsx
 import { useAccount } from "@dogeos/dogeos-sdk";
 
-function SignPSBT() {
+function SignPsbt() {
   const { currentProvider } = useAccount();
 
-  const signPSBT = async () => {
+  const signPsbt = async () => {
     if (!currentProvider) return;
     
     try {
-      const signedPsbt = await currentProvider.signPSBT({
-        psbt: "psbtHexString",
-      });
+      const signedPsbt = await currentProvider.signPsbt("psbtHexString");
       console.log("Signed PSBT:", signedPsbt);
     } catch (error) {
       console.error("Failed:", error);
     }
   };
 
-  return <button onClick={signPSBT}>Sign PSBT</button>;
+  return <button onClick={signPsbt}>Sign PSBT</button>;
 }
 ```
 
@@ -205,10 +197,8 @@ Sends Dogecoin to a specified address.
 **Parameters:**
 
 ```typescript
-{
-  to: string; // Recipient address
-  amount: number; // Amount in satoshi
-}
+to: string // Recipient address
+amount: number // Amount in satoshi
 ```
 
 **Returns:** `Promise<string>` - Transaction hash
@@ -225,10 +215,10 @@ function SendDogecoin() {
     if (!currentProvider) return;
     
     try {
-      const txHash = await currentProvider.sendDogecoin({
-        to: "D7hrf5D9LPtfC4cRo3UpFg8q6B3KJ2KZ2R",
-        amount: 100000000, // 1 DOGE (in satoshi)
-      });
+      const txHash = await currentProvider.sendDogecoin(
+        "D7hrf5D9LPtfC4cRo3UpFg8q6B3KJ2KZ2R",
+        100000000, // 1 DOGE in satoshi
+      );
       console.log("Transaction hash:", txHash);
     } catch (error) {
       console.error("Failed:", error);
@@ -264,9 +254,7 @@ export function DogecoinProviderExample() {
 
   const handleSignMessage = async () => {
     try {
-      const signature = await currentProvider.signMessage({
-        message: "Hello from Dogecoin",
-      });
+      const signature = await currentProvider.signMessage("Hello from Dogecoin");
       console.log("Signature:", signature);
     } catch (error) {
       console.error("Error:", error);

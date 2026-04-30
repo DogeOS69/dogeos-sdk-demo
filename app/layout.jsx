@@ -1,11 +1,7 @@
-import dynamic from "next/dynamic";
 import "nextra-theme-docs/style.css";
 import { Head } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
-
-const ClientLayout = dynamic(() =>
-  import("../components/client-layout").then((mod) => ({ default: mod.ClientLayout })),
-);
+import { ClientLayout } from "../components/client-layout";
 
 export const metadata = {};
 

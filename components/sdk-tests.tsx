@@ -1,10 +1,11 @@
 "use client";
 
 import type { Chain } from "@dogeos/dogeos-sdk";
-import { getChains, getConnectors, useAccount, useWalletConnect } from "@dogeos/dogeos-sdk";
+import { ChainTypeEnum, getChains, getConnectors, useAccount, useWalletConnect } from "@dogeos/dogeos-sdk";
 import { Button } from "@tomo-inc/tomo-ui";
 import { useState } from "react";
 import { polygon } from "viem/chains";
+import { dogeOSTestnet } from "./dogeos-testnet";
 
 type TestLogEntry = {
   id: string;
@@ -17,6 +18,14 @@ type TestLogEntry = {
 type ChainsResult = Awaited<ReturnType<typeof getChains>>;
 
 const createLogId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+const getSwitchableEvmChains = (source?: Chain[]) => {
+  const byId = new Map<string, Chain>();
+  [dogeOSTestnet, ...(source ?? [])].forEach((chain) => {
+    byId.set(String(chain.id), chain);
+  });
+  return [...byId.values()];
+};
 
 const formatPayload = (value: unknown) => {
   if (typeof value === "string") {
@@ -34,7 +43,20 @@ const formatPayload = (value: unknown) => {
 };
 
 export function SdkTests() {
-  const { openModal, closeModal, disconnect, connect, isConnected, error } = useWalletConnect();
+  const {
+    openModal,
+    closeModal,
+    disconnect,
+    connect,
+    isConnected,
+    isConnecting,
+    isDisconnected,
+    connectionStatus,
+    walletStatus,
+    isWalletReady,
+    isWalletLoading,
+    error,
+  } = useWalletConnect();
   const { address, balance, chainId, chainType, signMessage, signInWithWallet, switchChain, currentProvider, currentWallet } =
     useAccount();
   const [logs, setLogs] = useState<TestLogEntry[]>([]);
@@ -52,7 +74,7 @@ export function SdkTests() {
   const [selectedAccountActionId, setSelectedAccountActionId] = useState("signMessage");
   const [selectedEvmActionId, setSelectedEvmActionId] = useState("evmChainId");
   const [selectedDogeActionId, setSelectedDogeActionId] = useState("dogeRequest");
-  const [selectedSwitchChainId, setSelectedSwitchChainId] = useState<string>("");
+  const [selectedSwitchChainId, setSelectedSwitchChainId] = useState<string>(String(dogeOSTestnet.id));
   const [isFetchingChains, setIsFetchingChains] = useState(false);
 
   const appendLog = (entry: Omit<TestLogEntry, "id" | "timestamp">) => {
@@ -204,14 +226,14 @@ export function SdkTests() {
         throw new Error("Select a chain from the dropdown first.");
       }
       const resolvedChains = await resolveChains();
-      const evmChains = resolvedChains?.evm as Chain[] | undefined;
+      const evmChains = getSwitchableEvmChains(resolvedChains?.evm as Chain[] | undefined);
       const selectedChain = evmChains?.find(
         (c) => String(c.id) === selectedSwitchChainId || c.id === Number(selectedSwitchChainId)
       );
       if (!selectedChain) {
         throw new Error(`Chain ${selectedSwitchChainId} not found in available chains.`);
       }
-      return switchChain({ chainType: "evm", chainInfo: selectedChain });
+      return switchChain({ chainType: ChainTypeEnum.EVM, chainInfo: selectedChain });
     });
   };
 
@@ -220,7 +242,7 @@ export function SdkTests() {
       if (!currentWallet) {
         throw new Error("No wallet connected. Connect a wallet first.");
       }
-      return connect({ wallet: currentWallet, chainType: "dogecoin" });
+      return connect({ wallet: currentWallet, chainType: ChainTypeEnum.DOGECOIN });
     });
   };
 
@@ -229,7 +251,7 @@ export function SdkTests() {
       if (!currentWallet) {
         throw new Error("No wallet connected. Connect a wallet first.");
       }
-      return connect({ wallet: currentWallet, chainType: "evm" });
+      return connect({ wallet: currentWallet, chainType: ChainTypeEnum.EVM });
     });
   };
 
@@ -342,21 +364,19 @@ export function SdkTests() {
 
   const handleDogeSignMessage = () =>
     handleDogecoinRequest("signMessage", "signMessage", [
-      {
-        message: dogeMessage,
-      },
+      dogeMessage,
     ]);
 
   const handleDogeSignPSBT = () => {
     if (!dogePsbt) {
       appendLog({
-        title: "signPSBT",
+        title: "signPsbt",
         status: "error",
         payload: "PSBT hex is required.",
       });
       return;
     }
-    return handleDogecoinRequest("signPSBT", "signPSBT", [{ psbt: dogePsbt }]);
+    return handleDogecoinRequest("signPsbt", "signPsbt", [dogePsbt]);
   };
 
   const handleDogeSendDogecoin = () => {
@@ -377,7 +397,7 @@ export function SdkTests() {
       });
       return;
     }
-    return handleDogecoinRequest("sendDogecoin", "sendDogecoin", [{ to: dogeToAddress, amount: parsedAmount }]);
+    return handleDogecoinRequest("sendDogecoin", "sendDogecoin", [dogeToAddress, parsedAmount]);
   };
 
   const walletActions = [
@@ -415,7 +435,7 @@ export function SdkTests() {
     { id: "dogeAccounts", label: "DOGE: getAccounts", run: () => handleDogecoinRequest("getAccounts", "getAccounts") },
     { id: "dogeBalance", label: "DOGE: getBalance", run: () => handleDogecoinRequest("getBalance", "getBalance") },
     { id: "dogeSign", label: "DOGE: signMessage", run: handleDogeSignMessage },
-    { id: "dogeSignPsbt", label: "DOGE: signPSBT", run: handleDogeSignPSBT },
+    { id: "dogeSignPsbt", label: "DOGE: signPsbt", run: handleDogeSignPSBT },
     { id: "dogeSend", label: "DOGE: send", run: handleDogeSendDogecoin },
   ];
 
@@ -458,7 +478,17 @@ export function SdkTests() {
           <div className="flex flex-wrap gap-2">
             <div className="rounded-lg border border-content2 bg-content1 px-3 py-2">
               <div className="text-[10px] font-medium text-foreground/60 mb-0.5">Connection</div>
-              <div className="text-xs font-medium">{isConnected ? "Connected" : "Not connected"}</div>
+              <div className="text-xs font-medium">{connectionStatus}</div>
+            </div>
+            <div className="rounded-lg border border-content2 bg-content1 px-3 py-2">
+              <div className="text-[10px] font-medium text-foreground/60 mb-0.5">Wallet</div>
+              <div className="text-xs font-medium">{walletStatus}</div>
+            </div>
+            <div className="rounded-lg border border-content2 bg-content1 px-3 py-2">
+              <div className="text-[10px] font-medium text-foreground/60 mb-0.5">Ready</div>
+              <div className="text-xs font-medium">
+                {isWalletReady ? "ready" : isWalletLoading ? "loading" : isConnecting ? "connecting" : isDisconnected ? "disconnected" : "idle"}
+              </div>
             </div>
             <div className="rounded-lg border border-content2 bg-content1 px-3 py-2">
               <div className="text-[10px] font-medium text-foreground/60 mb-0.5">Account</div>
@@ -584,7 +614,7 @@ export function SdkTests() {
                   disabled={isFetchingChains}
                 >
                   <option value="">{isFetchingChains ? "Loading chains..." : "Select chain to switch..."}</option>
-                  {(chains?.evm as Chain[] | undefined)?.map((chain) => (
+                  {getSwitchableEvmChains(chains?.evm as Chain[] | undefined).map((chain) => (
                     <option key={chain.id} value={String(chain.id)}>
                       {chain.name} ({chain.id})
                     </option>

@@ -1,20 +1,15 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 import { Layout } from "nextra-theme-docs";
 import React from "react";
 import { AppFooter } from "./footer";
+import { NavbarWithActions } from "./navbar-with-actions";
 
 const LayoutWrapper = dynamic(() => import("./layout-wrapper").then((mod) => ({ default: mod.LayoutWrapper })), {
   ssr: false,
 });
-
-const NavbarWithActions = dynamic(
-  () => import("./navbar-with-actions").then((mod) => ({ default: mod.NavbarWithActions })),
-  {
-    ssr: false,
-  },
-);
 
 const RouteGuard = dynamic(() => import("./route-guard").then((mod) => ({ default: mod.RouteGuard })), {
   ssr: false,
@@ -22,15 +17,22 @@ const RouteGuard = dynamic(() => import("./route-guard").then((mod) => ({ defaul
 
 interface ClientLayoutProps {
   pageMap: any;
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  content?: React.ReactNode;
 }
 
-export function ClientLayout({ pageMap, children }: ClientLayoutProps) {
+export function ClientLayout({ pageMap, children, content }: ClientLayoutProps) {
+  const pathname = usePathname();
   const footer = <AppFooter />;
+  const layoutContent = content ?? children ?? null;
 
-  return (
-    <LayoutWrapper>
-      <RouteGuard>
+  if (pathname === "/") {
+    return <>{layoutContent}</>;
+  }
+
+  const page = (
+    <RouteGuard
+      content={
         <Layout
           navbar={<NavbarWithActions />}
           pageMap={pageMap}
@@ -45,9 +47,11 @@ export function ClientLayout({ pageMap, children }: ClientLayoutProps) {
             disableTransitionOnChange: false,
           }}
         >
-          {children}
+          {layoutContent}
         </Layout>
-      </RouteGuard>
-    </LayoutWrapper>
+      }
+    />
   );
+
+  return <LayoutWrapper content={page} />;
 }
