@@ -6,7 +6,7 @@ import React, { useEffect } from "react";
 
 const REDIRECT_KEY = "nextra-auth-redirect";
 
-export function RouteGuard({ children }: { children: React.ReactNode }) {
+export function RouteGuard({ children, content }: { children?: React.ReactNode; content?: React.ReactNode }) {
   const { isConnected } = useWalletConnect();
   const pathname = usePathname();
   const router = useRouter();
@@ -20,7 +20,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
     }
   }, [isConnected, pathname, router]);
 
-  return <>{children}</>;
+  return <>{content ?? children ?? null}</>;
 }
 
 export function getRedirectRoute(): string | null {
