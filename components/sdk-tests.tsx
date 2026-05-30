@@ -65,6 +65,7 @@ export function SdkTests() {
   const [messageNonce, setMessageNonce] = useState("");
   const [evmToAddress, setEvmToAddress] = useState("");
   const [evmValue, setEvmValue] = useState("0x0");
+  const [solanaMessage, setSolanaMessage] = useState("Hello Solana");
   const [dogeMessage, setDogeMessage] = useState("Hello Dogecoin");
   const [dogePsbt, setDogePsbt] = useState("");
   const [dogeToAddress, setDogeToAddress] = useState("");
@@ -73,6 +74,7 @@ export function SdkTests() {
   const [selectedSdkActionId, setSelectedSdkActionId] = useState("fetchChains");
   const [selectedAccountActionId, setSelectedAccountActionId] = useState("signMessage");
   const [selectedEvmActionId, setSelectedEvmActionId] = useState("evmChainId");
+  const [selectedSolanaActionId, setSelectedSolanaActionId] = useState("solanaPublicKey");
   const [selectedDogeActionId, setSelectedDogeActionId] = useState("dogeRequest");
   const [selectedSwitchChainId, setSelectedSwitchChainId] = useState<string>(String(dogeOSTestnet.id));
   const [isFetchingChains, setIsFetchingChains] = useState(false);
@@ -121,6 +123,13 @@ export function SdkTests() {
     return currentProvider as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
   };
 
+  const ensureSolanaProvider = () => {
+    if (chainType !== "solana" || !currentProvider) {
+      throw new Error("Connect a Solana wallet to run this test.");
+    }
+    return currentProvider as unknown as Record<string, unknown>;
+  };
+
   const ensureAddress = (title: string) => {
     if (!address) {
       appendLog({
@@ -140,6 +149,7 @@ export function SdkTests() {
       return {
         chainTypes: Object.keys(data ?? {}),
         evmChains: data?.evm?.length ?? 0,
+        solanaChains: data?.solana?.length ?? 0,
         dogecoinChains: data?.dogecoin?.length ?? 0,
       };
     });
@@ -246,6 +256,15 @@ export function SdkTests() {
     });
   };
 
+  const handleConnectSolana = async () => {
+    await runTest("connect(solana)", async () => {
+      if (!currentWallet) {
+        throw new Error("No wallet connected. Connect a wallet first.");
+      }
+      return connect({ wallet: currentWallet, chainType: ChainTypeEnum.SOLANA });
+    });
+  };
+
   const handleConnectEvm = async () => {
     await runTest("connect(evm)", async () => {
       if (!currentWallet) {
@@ -270,6 +289,17 @@ export function SdkTests() {
         throw new Error(`${method} is not available on the Dogecoin provider.`);
       }
       return fn(...(args ?? []));
+    });
+  };
+
+  const handleSolanaRequest = async (title: string, method: string, args?: unknown[]) => {
+    await runTest(title, async () => {
+      const provider = ensureSolanaProvider();
+      const fn = provider[method];
+      if (typeof fn !== "function") {
+        throw new Error(`${method} is not available on the Solana provider.`);
+      }
+      return (fn as (...args: unknown[]) => Promise<unknown> | unknown)(...(args ?? []));
     });
   };
 
@@ -367,6 +397,27 @@ export function SdkTests() {
       dogeMessage,
     ]);
 
+  const handleSolanaPublicKey = () =>
+    runTest("solana.publicKey", () => {
+      const provider = ensureSolanaProvider();
+      const publicKey = provider.publicKey as { toString?: () => string } | string | null | undefined;
+      if (!publicKey) {
+        throw new Error("publicKey is not available on the Solana provider.");
+      }
+      return typeof publicKey === "string" ? publicKey : publicKey.toString?.();
+    });
+
+  const handleSolanaSignMessage = () =>
+    runTest("solana signMessage()", async () => {
+      if (chainType !== "solana") {
+        throw new Error("Connect a Solana wallet to run this test.");
+      }
+      if (!signMessage) {
+        throw new Error("signMessage is unavailable. Connect a wallet first.");
+      }
+      return signMessage({ message: solanaMessage });
+    });
+
   const handleDogeSignPSBT = () => {
     if (!dogePsbt) {
       appendLog({
@@ -416,6 +467,7 @@ export function SdkTests() {
     { id: "signIn", label: "Sign In", run: handleSignIn },
     { id: "switchChain", label: "Switch Chain", run: handleSwitchChain },
     { id: "connectDogecoin", label: "Connect Dogecoin", run: handleConnectDogecoin },
+    { id: "connectSolana", label: "Connect Solana", run: handleConnectSolana },
     { id: "connectEvm", label: "Connect EVM", run: handleConnectEvm },
   ];
 
@@ -437,6 +489,12 @@ export function SdkTests() {
     { id: "dogeSign", label: "DOGE: signMessage", run: handleDogeSignMessage },
     { id: "dogeSignPsbt", label: "DOGE: signPsbt", run: handleDogeSignPSBT },
     { id: "dogeSend", label: "DOGE: send", run: handleDogeSendDogecoin },
+  ];
+
+  const solanaActions = [
+    { id: "solanaPublicKey", label: "SOL: publicKey", run: handleSolanaPublicKey },
+    { id: "solanaConnect", label: "SOL: connect", run: () => handleSolanaRequest("solana.connect", "connect") },
+    { id: "solanaSign", label: "SOL: signMessage", run: handleSolanaSignMessage },
   ];
 
   const selectorButtonClass = "px-2 py-0.5 text-xs";
@@ -703,6 +761,53 @@ export function SdkTests() {
                 size="sm"
                 color="primary"
                 onPress={() => runSelectedAction("Execute EVM", evmActions, selectedEvmActionId)}
+              >
+                Execute
+              </Button>
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-content2 p-4 space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold">Solana Provider Methods</h3>
+              <p className="text-xs text-foreground/60">Connection and signing checks for the Solana provider.</p>
+            </div>
+            <div>
+              <input
+                type="text"
+                value={solanaMessage}
+                onChange={(event) => setSolanaMessage(event.target.value)}
+                className="w-full rounded-lg border border-content2 bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Message to sign"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Solana actions">
+              {solanaActions.map((action) => {
+                const isSelected = selectedSolanaActionId === action.id;
+                return (
+                  <Button
+                    key={action.id}
+                    size="sm"
+                    color="default"
+                    variant={isSelected ? "flat" : "bordered"}
+                    onPress={() => setSelectedSolanaActionId(action.id)}
+                    aria-pressed={isSelected}
+                    className={selectorButtonClass}
+                    style={isSelected ? selectorSelectedBorderStyle : selectorBorderStyle}
+                  >
+                    <span className={selectorLabelClass}>
+                      {isSelected ? <span aria-hidden="true">✓</span> : null}
+                      {action.label}
+                    </span>
+                  </Button>
+                );
+              })}
+            </div>
+            <div>
+              <Button
+                size="sm"
+                color="primary"
+                onPress={() => runSelectedAction("Execute Solana", solanaActions, selectedSolanaActionId)}
               >
                 Execute
               </Button>

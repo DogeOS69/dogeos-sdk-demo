@@ -17,6 +17,14 @@ const Ethereum = ({ className }: { className?: string }) => (
   />
 );
 
+const Solana = ({ className }: { className?: string }) => (
+  <img
+    src="https://assets.coingecko.com/coins/images/4128/small/solana.png"
+    alt="Solana"
+    className={className}
+  />
+);
+
 const Doge = ({ className }: { className?: string }) => (
   <img
     src="https://assets.coingecko.com/coins/images/5/small/dogecoin.png"
@@ -47,6 +55,27 @@ const recommonedChains = {
   ],
 };
 
+const solanaMainnet: Chain = {
+  id: "solana:mainnet-beta",
+  name: "Solana",
+  nativeCurrency: {
+    name: "SOL",
+    symbol: "SOL",
+    decimals: 9,
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://api.mainnet-beta.solana.com"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Solana Explorer",
+      url: "https://explorer.solana.com",
+    },
+  },
+};
+
 export function DemoView() {
   const { theme } = useTheme();
   const [nextTheme, setNextTheme] = useState<string>("light");
@@ -64,6 +93,7 @@ export function DemoView() {
   const [darkBackgroundColor, setDarkBackgroundColor] = useState("#000");
   const [darkForegroundColor, setDarkForegroundColor] = useState("#FFF");
   const [enableEvm, setEnableEvm] = useState(true);
+  const [enableSolana, setEnableSolana] = useState(true);
   const [enableDogecoin, setEnableDogecoin] = useState(true);
 
   const handleSetTheme = (newTheme: string) => {
@@ -135,6 +165,7 @@ export function DemoView() {
         setDarkForegroundColor(storedConfig.darkForegroundColor);
       }
       if (typeof storedConfig.enableEvm === "boolean") setEnableEvm(storedConfig.enableEvm);
+      if (typeof storedConfig.enableSolana === "boolean") setEnableSolana(storedConfig.enableSolana);
       if (typeof storedConfig.enableDogecoin === "boolean") {
         setEnableDogecoin(storedConfig.enableDogecoin);
       }
@@ -200,6 +231,7 @@ export function DemoView() {
       darkBackgroundColor,
       darkForegroundColor,
       enableEvm,
+      enableSolana,
       enableDogecoin,
       currentTheme: nextTheme,
     };
@@ -219,6 +251,7 @@ export function DemoView() {
     darkBackgroundColor,
     darkForegroundColor,
     enableEvm,
+    enableSolana,
     enableDogecoin,
     nextTheme,
   ]);
@@ -244,6 +277,9 @@ export function DemoView() {
         base,
         polygon,
       ] as unknown as Chain[];
+    }
+    if (enableSolana) {
+      chains.solana = [solanaMainnet];
     }
     if (enableDogecoin) {
       (chains as Record<string, unknown>).dogecoin = recommonedChains.dogecoin;
@@ -323,6 +359,7 @@ export function DemoView() {
     darkBackgroundColor,
     darkForegroundColor,
     enableEvm,
+    enableSolana,
     enableDogecoin,
   ]);
 
@@ -352,6 +389,9 @@ export function DemoView() {
         nativeCurrency: chain.nativeCurrency,
         rpcUrls: chain.rpcUrls,
       }));
+    }
+    if (enableSolana) {
+      chainsConfig.solana = [solanaMainnet];
     }
     if (enableDogecoin) {
       chainsConfig.dogecoin = recommonedChains.dogecoin;
@@ -478,6 +518,7 @@ App metadata for WalletConnect
     darkBackgroundColor,
     darkForegroundColor,
     enableEvm,
+    enableSolana,
     enableDogecoin,
   ]);
 
@@ -518,6 +559,8 @@ App metadata for WalletConnect
             setTheme={handleSetTheme}
             enableEvm={enableEvm}
             setEnableEvm={setEnableEvm}
+            enableSolana={enableSolana}
+            setEnableSolana={setEnableSolana}
             enableDogecoin={enableDogecoin}
             setEnableDogecoin={setEnableDogecoin}
             configCode={configCodeMarkdown}
@@ -577,6 +620,8 @@ interface WalletDemoProps {
   setTheme: (theme: string) => void;
   enableEvm: boolean;
   setEnableEvm: (value: boolean) => void;
+  enableSolana: boolean;
+  setEnableSolana: (value: boolean) => void;
   enableDogecoin: boolean;
   setEnableDogecoin: (value: boolean) => void;
   configCode: string;
@@ -611,6 +656,8 @@ function WalletDemo({
   setTheme,
   enableEvm,
   setEnableEvm,
+  enableSolana,
+  setEnableSolana,
   enableDogecoin,
   setEnableDogecoin,
   configCode,
@@ -645,6 +692,8 @@ function WalletDemo({
       setTheme={setTheme}
       enableEvm={enableEvm}
       setEnableEvm={setEnableEvm}
+      enableSolana={enableSolana}
+      setEnableSolana={setEnableSolana}
       enableDogecoin={enableDogecoin}
       setEnableDogecoin={setEnableDogecoin}
     />
@@ -682,6 +731,8 @@ interface ConfigPanelProps {
   setTheme: (theme: string) => void;
   enableEvm: boolean;
   setEnableEvm: (value: boolean) => void;
+  enableSolana: boolean;
+  setEnableSolana: (value: boolean) => void;
   enableDogecoin: boolean;
   setEnableDogecoin: (value: boolean) => void;
 }
@@ -717,6 +768,8 @@ function ConfigPanel({
   setTheme,
   enableEvm,
   setEnableEvm,
+  enableSolana,
+  setEnableSolana,
   enableDogecoin,
   setEnableDogecoin,
 }: ConfigPanelProps) {
@@ -1218,6 +1271,31 @@ function ConfigPanel({
                     type="checkbox"
                     checked={enableDogecoin}
                     onChange={(e) => setEnableDogecoin(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div
+                    className="w-11 h-6 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success"
+                    style={{
+                      backgroundColor: isolatedContent2,
+                    }}
+                  ></div>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between py-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 flex items-center justify-center overflow-hidden rounded-full">
+                    <Solana className="w-full h-full" />
+                  </div>
+                  <span className="text-sm" style={{ color: isolatedForeground }}>
+                    Solana
+                  </span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={enableSolana}
+                    onChange={(e) => setEnableSolana(e.target.checked)}
                     className="sr-only peer"
                   />
                   <div

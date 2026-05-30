@@ -1,6 +1,6 @@
 "use client";
 
-import type { WalletConnectKitConfig } from "@dogeos/dogeos-sdk";
+import type { Chain, WalletConnectKitConfig } from "@dogeos/dogeos-sdk";
 import { WalletConnectProvider } from "@dogeos/dogeos-sdk";
 import React, { useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
@@ -16,6 +16,27 @@ const DOGEOS_X_CLIENT_ID =
   process.env.NEXT_PUBLIC_DOGEOS_X_CLIENT_ID ?? "cTQxTUlSZXhwOXF6T2hnTHJVRzI6MTpjaQ";
 const WALLETCONNECT_PROJECT_ID =
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "44cb8a6aedbe379ba8f2fa4fbc1a461f";
+
+const solanaMainnet: Chain = {
+  id: "solana:mainnet-beta",
+  name: "Solana",
+  nativeCurrency: {
+    name: "SOL",
+    symbol: "SOL",
+    decimals: 9,
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://api.mainnet-beta.solana.com"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Solana Explorer",
+      url: "https://explorer.solana.com",
+    },
+  },
+};
 
 export function GlobalWalletProvider({ children }: { children: React.ReactNode }) {
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");
@@ -61,6 +82,7 @@ export function GlobalWalletProvider({ children }: { children: React.ReactNode }
       clientId: DOGEOS_CLIENT_ID,
       chains: {
         evm: [dogeOSTestnet, mainnet],
+        solana: [solanaMainnet],
       },
       metadata: getDogeOSDemoMetadata(),
       login: {

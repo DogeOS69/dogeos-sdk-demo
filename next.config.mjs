@@ -1,7 +1,10 @@
 import nextra from "nextra";
 import { createRequire } from "module";
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
 
 const require = createRequire(import.meta.url);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default function nextConfig(phase) {
   const withNextra = nextra({
@@ -18,6 +21,9 @@ export default function nextConfig(phase) {
     ],
     typescript: {
       ignoreBuildErrors: true,
+    },
+    turbopack: {
+      root: resolve(__dirname, ".."),
     },
     webpack: (config, { isServer }) => {
       if (!isServer) {
