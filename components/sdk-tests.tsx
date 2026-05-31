@@ -310,16 +310,16 @@ export function SdkTests() {
   const handleDisconnect = () => runTest("disconnect()", () => disconnect());
 
   const handleEvmSendTransaction = () => {
-    if (!ensureAddress("eth_sendTransaction")) return;
+    if (!ensureAddress("EVM: sendTx")) return;
     if (!resolvedEvmTo) {
       appendLog({
-        title: "eth_sendTransaction",
+        title: "EVM: sendTx",
         status: "error",
         payload: "Recipient address is required.",
       });
       return;
     }
-    return handleEvmRequest("eth_sendTransaction", "eth_sendTransaction", [
+    return handleEvmRequest("EVM: sendTx", "eth_sendTransaction", [
       {
         from: address,
         to: resolvedEvmTo,
@@ -329,13 +329,13 @@ export function SdkTests() {
   };
 
   const handleEvmGetBalance = () => {
-    if (!ensureAddress("eth_getBalance")) return;
-    return handleEvmRequest("eth_getBalance", "eth_getBalance", [address, "latest"]);
+    if (!ensureAddress("EVM: balance")) return;
+    return handleEvmRequest("EVM: balance", "eth_getBalance", [address, "latest"]);
   };
 
   const handleEvmSignTransaction = () => {
-    if (!ensureAddress("eth_signTransaction")) return;
-    return handleEvmRequest("eth_signTransaction", "eth_signTransaction", [
+    if (!ensureAddress("EVM: signTx")) return;
+    return handleEvmRequest("EVM: signTx", "eth_signTransaction", [
       {
         from: address,
         to: resolvedEvmTo,
@@ -347,8 +347,8 @@ export function SdkTests() {
   };
 
   const handleEvmSignTypedData = () => {
-    if (!ensureAddress("eth_signTypedData_v4")) return;
-    return handleEvmRequest("eth_signTypedData_v4", "eth_signTypedData_v4", [
+    if (!ensureAddress("EVM: signTyped")) return;
+    return handleEvmRequest("EVM: signTyped", "eth_signTypedData_v4", [
       address,
       JSON.stringify({
         types: {
@@ -370,7 +370,7 @@ export function SdkTests() {
   };
 
   const handleEvmAddChain = () =>
-    handleEvmRequest("wallet_addEthereumChain", "wallet_addEthereumChain", [
+    handleEvmRequest("EVM: addChain", "wallet_addEthereumChain", [
       {
         chainId: "0x89",
         chainName: "Polygon Mainnet",
@@ -381,24 +381,24 @@ export function SdkTests() {
     ]);
 
   const handleEvmEstimateGas = () => {
-    if (!ensureAddress("eth_estimateGas")) return;
-    return handleEvmRequest("eth_estimateGas", "eth_estimateGas", [
+    if (!ensureAddress("EVM: estimateGas")) return;
+    return handleEvmRequest("EVM: estimateGas", "eth_estimateGas", [
       { from: address, to: resolvedEvmTo, value: evmValue || "0x0" },
     ]);
   };
 
   const handleEvmGetTransactionCount = () => {
-    if (!ensureAddress("eth_getTransactionCount")) return;
-    return handleEvmRequest("eth_getTransactionCount", "eth_getTransactionCount", [address, "latest"]);
+    if (!ensureAddress("EVM: txCount")) return;
+    return handleEvmRequest("EVM: txCount", "eth_getTransactionCount", [address, "latest"]);
   };
 
   const handleDogeSignMessage = () =>
-    handleDogecoinRequest("signMessage", "signMessage", [
+    handleDogecoinRequest("DOGE: signMessage", "signMessage", [
       dogeMessage,
     ]);
 
   const handleSolanaPublicKey = () =>
-    runTest("solana.publicKey", () => {
+    runTest("SOL: publicKey", () => {
       const provider = ensureSolanaProvider();
       const publicKey = provider.publicKey as { toString?: () => string } | string | null | undefined;
       if (!publicKey) {
@@ -408,7 +408,7 @@ export function SdkTests() {
     });
 
   const handleSolanaSignMessage = () =>
-    runTest("solana signMessage()", async () => {
+    runTest("SOL: signMessage", async () => {
       if (chainType !== "solana") {
         throw new Error("Connect a Solana wallet to run this test.");
       }
@@ -421,19 +421,19 @@ export function SdkTests() {
   const handleDogeSignPSBT = () => {
     if (!dogePsbt) {
       appendLog({
-        title: "signPsbt",
+        title: "DOGE: signPsbt",
         status: "error",
         payload: "PSBT hex is required.",
       });
       return;
     }
-    return handleDogecoinRequest("signPsbt", "signPsbt", [dogePsbt]);
+    return handleDogecoinRequest("DOGE: signPsbt", "signPsbt", [dogePsbt]);
   };
 
   const handleDogeSendDogecoin = () => {
     if (!dogeToAddress || !dogeAmount) {
       appendLog({
-        title: "sendDogecoin",
+        title: "DOGE: send",
         status: "error",
         payload: "Recipient and amount are required.",
       });
@@ -442,13 +442,13 @@ export function SdkTests() {
     const parsedAmount = Number(dogeAmount);
     if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
       appendLog({
-        title: "sendDogecoin",
+        title: "DOGE: send",
         status: "error",
         payload: "Amount must be a positive number.",
       });
       return;
     }
-    return handleDogecoinRequest("sendDogecoin", "sendDogecoin", [dogeToAddress, parsedAmount]);
+    return handleDogecoinRequest("DOGE: send", "sendDogecoin", [dogeToAddress, parsedAmount]);
   };
 
   const walletActions = [
@@ -472,7 +472,7 @@ export function SdkTests() {
   ];
 
   const evmActions = [
-    { id: "evmChainId", label: "EVM: chainId", run: () => handleEvmRequest("eth_chainId", "eth_chainId") },
+    { id: "evmChainId", label: "EVM: chainId", run: () => handleEvmRequest("EVM: chainId", "eth_chainId") },
     { id: "evmBalance", label: "EVM: balance", run: handleEvmGetBalance },
     { id: "evmSend", label: "EVM: sendTx", run: handleEvmSendTransaction },
     { id: "evmSignTx", label: "EVM: signTx", run: handleEvmSignTransaction },
@@ -483,9 +483,9 @@ export function SdkTests() {
   ];
 
   const dogeActions = [
-    { id: "dogeRequest", label: "DOGE: requestAccounts", run: () => handleDogecoinRequest("requestAccounts", "requestAccounts") },
-    { id: "dogeAccounts", label: "DOGE: getAccounts", run: () => handleDogecoinRequest("getAccounts", "getAccounts") },
-    { id: "dogeBalance", label: "DOGE: getBalance", run: () => handleDogecoinRequest("getBalance", "getBalance") },
+    { id: "dogeRequest", label: "DOGE: requestAccounts", run: () => handleDogecoinRequest("DOGE: requestAccounts", "requestAccounts") },
+    { id: "dogeAccounts", label: "DOGE: getAccounts", run: () => handleDogecoinRequest("DOGE: getAccounts", "getAccounts") },
+    { id: "dogeBalance", label: "DOGE: getBalance", run: () => handleDogecoinRequest("DOGE: getBalance", "getBalance") },
     { id: "dogeSign", label: "DOGE: signMessage", run: handleDogeSignMessage },
     { id: "dogeSignPsbt", label: "DOGE: signPsbt", run: handleDogeSignPSBT },
     { id: "dogeSend", label: "DOGE: send", run: handleDogeSendDogecoin },
@@ -493,7 +493,7 @@ export function SdkTests() {
 
   const solanaActions = [
     { id: "solanaPublicKey", label: "SOL: publicKey", run: handleSolanaPublicKey },
-    { id: "solanaConnect", label: "SOL: connect", run: () => handleSolanaRequest("solana.connect", "connect") },
+    { id: "solanaConnect", label: "SOL: connect", run: () => handleSolanaRequest("SOL: connect", "connect") },
     { id: "solanaSign", label: "SOL: signMessage", run: handleSolanaSignMessage },
   ];
 
