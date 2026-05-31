@@ -4,7 +4,7 @@ import type { WalletConnectKitConfig } from "@dogeos/dogeos-sdk";
 import { WalletConnectProvider } from "@dogeos/dogeos-sdk";
 import React, { useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
-import { dogeOSTestnet, getDogeOSDemoMetadata } from "./dogeos-testnet";
+import { dogeOSTestnet, getDogeOSDemoMetadata, solanaMainnet } from "./dogeos-testnet";
 
 const DOGEOS_CLIENT_ID =
   process.env.NEXT_PUBLIC_DOGEOS_CLIENT_ID ??
@@ -61,6 +61,7 @@ export function GlobalWalletProvider({ children }: { children: React.ReactNode }
       clientId: DOGEOS_CLIENT_ID,
       chains: {
         evm: [dogeOSTestnet, mainnet],
+        solana: [solanaMainnet],
       },
       metadata: getDogeOSDemoMetadata(),
       login: {

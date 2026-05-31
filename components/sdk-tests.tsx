@@ -19,6 +19,102 @@ type ChainsResult = Awaited<ReturnType<typeof getChains>>;
 
 const createLogId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
+const getSolanaPublicKeyString = (value: unknown): string | null => {
+  if (!value) return null;
+  if (typeof value === "string") return value;
+  if (typeof value !== "object") return null;
+
+  const publicKey = value as {
+    address?: unknown;
+    publicKey?: unknown;
+    pubkey?: unknown;
+    toString?: () => string;
+  };
+
+  if (typeof publicKey.pubkey === "string") return publicKey.pubkey;
+  if (typeof publicKey.address === "string") return publicKey.address;
+  if (typeof publicKey.publicKey === "string") return publicKey.publicKey;
+
+  const resultPublicKey = getSolanaPublicKeyFromAccounts((publicKey as { result?: unknown }).result);
+  if (resultPublicKey) return resultPublicKey;
+
+  const accountsPublicKey = getSolanaPublicKeyFromAccounts((publicKey as { accounts?: unknown }).accounts);
+  if (accountsPublicKey) return accountsPublicKey;
+
+  const nestedPublicKey = getSolanaPublicKeyString(publicKey.publicKey);
+  if (nestedPublicKey) return nestedPublicKey;
+
+  if (typeof publicKey.toString === "function") {
+    const text = publicKey.toString();
+    return text && text !== "[object Object]" ? text : null;
+  }
+
+  return null;
+};
+
+const getSolanaPublicKeyFromAccounts = (accounts: unknown): string | null => {
+  const account = Array.isArray(accounts) ? accounts[0] : accounts;
+  return getSolanaPublicKeyString(account);
+};
+
+const invokeSolanaProviderMethod = async (
+  provider: Record<string, unknown>,
+  method: string,
+  params?: unknown[],
+): Promise<unknown> => {
+  const fn = provider[method];
+  if (typeof fn === "function") {
+    return fn.apply(provider, params ?? []);
+  }
+
+  const request = provider.request;
+  if (typeof request === "function") {
+    return request.call(provider, { method, params });
+  }
+
+  throw new Error(`${method} is not available on the Solana provider.`);
+};
+
+const getSolanaPublicKeyFromProviderMethod = async (
+  provider: Record<string, unknown>,
+  method: string,
+  params?: unknown[],
+): Promise<string | null> => {
+  let lastError: unknown;
+
+  const request = provider.request;
+  if (typeof request === "function") {
+    try {
+      const result = await request.call(provider, { method, params });
+      const publicKey = getSolanaPublicKeyFromAccounts(result);
+      if (publicKey) {
+        return publicKey;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  const fn = provider[method];
+  if (typeof fn === "function") {
+    try {
+      const result = await fn.apply(provider, params ?? []);
+      const publicKey = getSolanaPublicKeyFromAccounts(result);
+      if (publicKey) {
+        return publicKey;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (lastError) {
+    throw lastError;
+  }
+
+  return null;
+};
+
 const getSwitchableEvmChains = (source?: Chain[]) => {
   const byId = new Map<string, Chain>();
   [dogeOSTestnet, ...(source ?? [])].forEach((chain) => {
@@ -40,6 +136,13 @@ const formatPayload = (value: unknown) => {
   } catch (error) {
     return String(error ?? value);
   }
+};
+
+const getChainLogPrefix = (chainType?: string | null) => {
+  if (chainType === ChainTypeEnum.EVM) return "EVM";
+  if (chainType === ChainTypeEnum.SOLANA) return "SOL";
+  if (chainType === ChainTypeEnum.DOGECOIN) return "DOGE";
+  return "Account";
 };
 
 export function SdkTests() {
@@ -65,6 +168,7 @@ export function SdkTests() {
   const [messageNonce, setMessageNonce] = useState("");
   const [evmToAddress, setEvmToAddress] = useState("");
   const [evmValue, setEvmValue] = useState("0x0");
+  const [solanaMessage, setSolanaMessage] = useState("Hello Solana");
   const [dogeMessage, setDogeMessage] = useState("Hello Dogecoin");
   const [dogePsbt, setDogePsbt] = useState("");
   const [dogeToAddress, setDogeToAddress] = useState("");
@@ -73,6 +177,7 @@ export function SdkTests() {
   const [selectedSdkActionId, setSelectedSdkActionId] = useState("fetchChains");
   const [selectedAccountActionId, setSelectedAccountActionId] = useState("signMessage");
   const [selectedEvmActionId, setSelectedEvmActionId] = useState("evmChainId");
+  const [selectedSolanaActionId, setSelectedSolanaActionId] = useState("solanaPublicKey");
   const [selectedDogeActionId, setSelectedDogeActionId] = useState("dogeRequest");
   const [selectedSwitchChainId, setSelectedSwitchChainId] = useState<string>(String(dogeOSTestnet.id));
   const [isFetchingChains, setIsFetchingChains] = useState(false);
@@ -121,6 +226,13 @@ export function SdkTests() {
     return currentProvider as unknown as Record<string, (...args: unknown[]) => Promise<unknown>>;
   };
 
+  const ensureSolanaProvider = () => {
+    if (chainType !== "solana" || !currentProvider) {
+      throw new Error("Connect a Solana wallet to run this test.");
+    }
+    return currentProvider as unknown as Record<string, unknown>;
+  };
+
   const ensureAddress = (title: string) => {
     if (!address) {
       appendLog({
@@ -140,6 +252,7 @@ export function SdkTests() {
       return {
         chainTypes: Object.keys(data ?? {}),
         evmChains: data?.evm?.length ?? 0,
+        solanaChains: data?.solana?.length ?? 0,
         dogecoinChains: data?.dogecoin?.length ?? 0,
       };
     });
@@ -156,7 +269,7 @@ export function SdkTests() {
   };
 
   const handleSignMessage = async () => {
-    await runTest("signMessage()", async () => {
+    await runTest(`${getChainLogPrefix(chainType)}: signMessage`, async () => {
       if (!signMessage) {
         throw new Error("signMessage is unavailable. Connect a wallet first.");
       }
@@ -168,7 +281,7 @@ export function SdkTests() {
   };
 
   const handleSignIn = async () => {
-    await runTest("signInWithWallet()", async () => {
+    await runTest(`${getChainLogPrefix(chainType)}: signInWithWallet`, async () => {
       if (!signInWithWallet) {
         throw new Error("signInWithWallet is unavailable. Connect a wallet first.");
       }
@@ -246,6 +359,15 @@ export function SdkTests() {
     });
   };
 
+  const handleConnectSolana = async () => {
+    await runTest("connect(solana)", async () => {
+      if (!currentWallet) {
+        throw new Error("No wallet connected. Connect a wallet first.");
+      }
+      return connect({ wallet: currentWallet, chainType: ChainTypeEnum.SOLANA });
+    });
+  };
+
   const handleConnectEvm = async () => {
     await runTest("connect(evm)", async () => {
       if (!currentWallet) {
@@ -273,6 +395,13 @@ export function SdkTests() {
     });
   };
 
+  const handleSolanaRequest = async (title: string, method: string, args?: unknown[]) => {
+    await runTest(title, async () => {
+      const provider = ensureSolanaProvider();
+      return invokeSolanaProviderMethod(provider, method, args);
+    });
+  };
+
   const resolvedEvmTo = evmToAddress || address || "";
   const chainIdNumber = chainId ? Number.parseInt(chainId, 16) || 1 : 1;
   const handleOpenModal = () => runTest("openModal()", () => openModal());
@@ -280,16 +409,16 @@ export function SdkTests() {
   const handleDisconnect = () => runTest("disconnect()", () => disconnect());
 
   const handleEvmSendTransaction = () => {
-    if (!ensureAddress("eth_sendTransaction")) return;
+    if (!ensureAddress("EVM: sendTx")) return;
     if (!resolvedEvmTo) {
       appendLog({
-        title: "eth_sendTransaction",
+        title: "EVM: sendTx",
         status: "error",
         payload: "Recipient address is required.",
       });
       return;
     }
-    return handleEvmRequest("eth_sendTransaction", "eth_sendTransaction", [
+    return handleEvmRequest("EVM: sendTx", "eth_sendTransaction", [
       {
         from: address,
         to: resolvedEvmTo,
@@ -299,13 +428,13 @@ export function SdkTests() {
   };
 
   const handleEvmGetBalance = () => {
-    if (!ensureAddress("eth_getBalance")) return;
-    return handleEvmRequest("eth_getBalance", "eth_getBalance", [address, "latest"]);
+    if (!ensureAddress("EVM: balance")) return;
+    return handleEvmRequest("EVM: balance", "eth_getBalance", [address, "latest"]);
   };
 
   const handleEvmSignTransaction = () => {
-    if (!ensureAddress("eth_signTransaction")) return;
-    return handleEvmRequest("eth_signTransaction", "eth_signTransaction", [
+    if (!ensureAddress("EVM: signTx")) return;
+    return handleEvmRequest("EVM: signTx", "eth_signTransaction", [
       {
         from: address,
         to: resolvedEvmTo,
@@ -317,8 +446,8 @@ export function SdkTests() {
   };
 
   const handleEvmSignTypedData = () => {
-    if (!ensureAddress("eth_signTypedData_v4")) return;
-    return handleEvmRequest("eth_signTypedData_v4", "eth_signTypedData_v4", [
+    if (!ensureAddress("EVM: signTyped")) return;
+    return handleEvmRequest("EVM: signTyped", "eth_signTypedData_v4", [
       address,
       JSON.stringify({
         types: {
@@ -340,7 +469,7 @@ export function SdkTests() {
   };
 
   const handleEvmAddChain = () =>
-    handleEvmRequest("wallet_addEthereumChain", "wallet_addEthereumChain", [
+    handleEvmRequest("EVM: addChain", "wallet_addEthereumChain", [
       {
         chainId: "0x89",
         chainName: "Polygon Mainnet",
@@ -351,38 +480,71 @@ export function SdkTests() {
     ]);
 
   const handleEvmEstimateGas = () => {
-    if (!ensureAddress("eth_estimateGas")) return;
-    return handleEvmRequest("eth_estimateGas", "eth_estimateGas", [
+    if (!ensureAddress("EVM: estimateGas")) return;
+    return handleEvmRequest("EVM: estimateGas", "eth_estimateGas", [
       { from: address, to: resolvedEvmTo, value: evmValue || "0x0" },
     ]);
   };
 
   const handleEvmGetTransactionCount = () => {
-    if (!ensureAddress("eth_getTransactionCount")) return;
-    return handleEvmRequest("eth_getTransactionCount", "eth_getTransactionCount", [address, "latest"]);
+    if (!ensureAddress("EVM: txCount")) return;
+    return handleEvmRequest("EVM: txCount", "eth_getTransactionCount", [address, "latest"]);
   };
 
   const handleDogeSignMessage = () =>
-    handleDogecoinRequest("signMessage", "signMessage", [
+    handleDogecoinRequest("DOGE: signMessage", "signMessage", [
       dogeMessage,
     ]);
+
+  const handleSolanaPublicKey = () =>
+    runTest("SOL: publicKey", async () => {
+      const provider = ensureSolanaProvider();
+      const publicKey = getSolanaPublicKeyString(provider.publicKey);
+      if (publicKey) {
+        return publicKey;
+      }
+
+      for (const method of ["solana_getAccounts", "getAccounts", "getPublicKey", "solana_requestAccounts"]) {
+        try {
+          const accountPublicKey = await getSolanaPublicKeyFromProviderMethod(provider, method);
+          if (accountPublicKey) {
+            return accountPublicKey;
+          }
+        } catch {
+          // Try the next provider shape.
+        }
+      }
+
+      throw new Error("No Solana public key found on the provider.");
+    });
+
+  const handleSolanaSignMessage = () =>
+    runTest("SOL: signMessage", async () => {
+      if (chainType !== "solana") {
+        throw new Error("Connect a Solana wallet to run this test.");
+      }
+      if (!signMessage) {
+        throw new Error("signMessage is unavailable. Connect a wallet first.");
+      }
+      return signMessage({ message: solanaMessage });
+    });
 
   const handleDogeSignPSBT = () => {
     if (!dogePsbt) {
       appendLog({
-        title: "signPsbt",
+        title: "DOGE: signPsbt",
         status: "error",
         payload: "PSBT hex is required.",
       });
       return;
     }
-    return handleDogecoinRequest("signPsbt", "signPsbt", [dogePsbt]);
+    return handleDogecoinRequest("DOGE: signPsbt", "signPsbt", [dogePsbt]);
   };
 
   const handleDogeSendDogecoin = () => {
     if (!dogeToAddress || !dogeAmount) {
       appendLog({
-        title: "sendDogecoin",
+        title: "DOGE: send",
         status: "error",
         payload: "Recipient and amount are required.",
       });
@@ -391,13 +553,13 @@ export function SdkTests() {
     const parsedAmount = Number(dogeAmount);
     if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
       appendLog({
-        title: "sendDogecoin",
+        title: "DOGE: send",
         status: "error",
         payload: "Amount must be a positive number.",
       });
       return;
     }
-    return handleDogecoinRequest("sendDogecoin", "sendDogecoin", [dogeToAddress, parsedAmount]);
+    return handleDogecoinRequest("DOGE: send", "sendDogecoin", [dogeToAddress, parsedAmount]);
   };
 
   const walletActions = [
@@ -416,11 +578,12 @@ export function SdkTests() {
     { id: "signIn", label: "Sign In", run: handleSignIn },
     { id: "switchChain", label: "Switch Chain", run: handleSwitchChain },
     { id: "connectDogecoin", label: "Connect Dogecoin", run: handleConnectDogecoin },
+    { id: "connectSolana", label: "Connect Solana", run: handleConnectSolana },
     { id: "connectEvm", label: "Connect EVM", run: handleConnectEvm },
   ];
 
   const evmActions = [
-    { id: "evmChainId", label: "EVM: chainId", run: () => handleEvmRequest("eth_chainId", "eth_chainId") },
+    { id: "evmChainId", label: "EVM: chainId", run: () => handleEvmRequest("EVM: chainId", "eth_chainId") },
     { id: "evmBalance", label: "EVM: balance", run: handleEvmGetBalance },
     { id: "evmSend", label: "EVM: sendTx", run: handleEvmSendTransaction },
     { id: "evmSignTx", label: "EVM: signTx", run: handleEvmSignTransaction },
@@ -431,12 +594,18 @@ export function SdkTests() {
   ];
 
   const dogeActions = [
-    { id: "dogeRequest", label: "DOGE: requestAccounts", run: () => handleDogecoinRequest("requestAccounts", "requestAccounts") },
-    { id: "dogeAccounts", label: "DOGE: getAccounts", run: () => handleDogecoinRequest("getAccounts", "getAccounts") },
-    { id: "dogeBalance", label: "DOGE: getBalance", run: () => handleDogecoinRequest("getBalance", "getBalance") },
+    { id: "dogeRequest", label: "DOGE: requestAccounts", run: () => handleDogecoinRequest("DOGE: requestAccounts", "requestAccounts") },
+    { id: "dogeAccounts", label: "DOGE: getAccounts", run: () => handleDogecoinRequest("DOGE: getAccounts", "getAccounts") },
+    { id: "dogeBalance", label: "DOGE: getBalance", run: () => handleDogecoinRequest("DOGE: getBalance", "getBalance") },
     { id: "dogeSign", label: "DOGE: signMessage", run: handleDogeSignMessage },
     { id: "dogeSignPsbt", label: "DOGE: signPsbt", run: handleDogeSignPSBT },
     { id: "dogeSend", label: "DOGE: send", run: handleDogeSendDogecoin },
+  ];
+
+  const solanaActions = [
+    { id: "solanaPublicKey", label: "SOL: publicKey", run: handleSolanaPublicKey },
+    { id: "solanaConnect", label: "SOL: connect", run: () => handleSolanaRequest("SOL: connect", "connect") },
+    { id: "solanaSign", label: "SOL: signMessage", run: handleSolanaSignMessage },
   ];
 
   const selectorButtonClass = "px-2 py-0.5 text-xs";
@@ -703,6 +872,53 @@ export function SdkTests() {
                 size="sm"
                 color="primary"
                 onPress={() => runSelectedAction("Execute EVM", evmActions, selectedEvmActionId)}
+              >
+                Execute
+              </Button>
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-content2 p-4 space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold">Solana Provider Methods</h3>
+              <p className="text-xs text-foreground/60">Connection and signing checks for the Solana provider.</p>
+            </div>
+            <div>
+              <input
+                type="text"
+                value={solanaMessage}
+                onChange={(event) => setSolanaMessage(event.target.value)}
+                className="w-full rounded-lg border border-content2 bg-background px-3 py-2 text-sm text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Message to sign"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Solana actions">
+              {solanaActions.map((action) => {
+                const isSelected = selectedSolanaActionId === action.id;
+                return (
+                  <Button
+                    key={action.id}
+                    size="sm"
+                    color="default"
+                    variant={isSelected ? "flat" : "bordered"}
+                    onPress={() => setSelectedSolanaActionId(action.id)}
+                    aria-pressed={isSelected}
+                    className={selectorButtonClass}
+                    style={isSelected ? selectorSelectedBorderStyle : selectorBorderStyle}
+                  >
+                    <span className={selectorLabelClass}>
+                      {isSelected ? <span aria-hidden="true">✓</span> : null}
+                      {action.label}
+                    </span>
+                  </Button>
+                );
+              })}
+            </div>
+            <div>
+              <Button
+                size="sm"
+                color="primary"
+                onPress={() => runSelectedAction("Execute Solana", solanaActions, selectedSolanaActionId)}
               >
                 Execute
               </Button>

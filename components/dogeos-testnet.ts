@@ -31,3 +31,24 @@ export const dogeOSTestnet = {
   },
   testnet: true,
 } as const satisfies Chain;
+
+export const solanaMainnet = {
+  id: "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+  name: "Solana",
+  nativeCurrency: {
+    name: "SOL",
+    symbol: "SOL",
+    decimals: 9,
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://api.mainnet-beta.solana.com"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Solana Explorer",
+      url: "https://explorer.solana.com",
+    },
+  },
+} as const satisfies Chain;
