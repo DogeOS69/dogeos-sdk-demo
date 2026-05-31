@@ -57,22 +57,62 @@ const getSolanaPublicKeyFromAccounts = (accounts: unknown): string | null => {
   return getSolanaPublicKeyString(account);
 };
 
-const requestSolanaProvider = async (
+const invokeSolanaProviderMethod = async (
   provider: Record<string, unknown>,
   method: string,
   params?: unknown[],
 ): Promise<unknown> => {
-  const request = provider.request;
-  if (typeof request === "function") {
-    return request.call(provider, { method, params });
-  }
-
   const fn = provider[method];
   if (typeof fn === "function") {
     return fn.apply(provider, params ?? []);
   }
 
-  return undefined;
+  const request = provider.request;
+  if (typeof request === "function") {
+    return request.call(provider, { method, params });
+  }
+
+  throw new Error(`${method} is not available on the Solana provider.`);
+};
+
+const getSolanaPublicKeyFromProviderMethod = async (
+  provider: Record<string, unknown>,
+  method: string,
+  params?: unknown[],
+): Promise<string | null> => {
+  let lastError: unknown;
+
+  const request = provider.request;
+  if (typeof request === "function") {
+    try {
+      const result = await request.call(provider, { method, params });
+      const publicKey = getSolanaPublicKeyFromAccounts(result);
+      if (publicKey) {
+        return publicKey;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  const fn = provider[method];
+  if (typeof fn === "function") {
+    try {
+      const result = await fn.apply(provider, params ?? []);
+      const publicKey = getSolanaPublicKeyFromAccounts(result);
+      if (publicKey) {
+        return publicKey;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  if (lastError) {
+    throw lastError;
+  }
+
+  return null;
 };
 
 const getSwitchableEvmChains = (source?: Chain[]) => {
@@ -358,11 +398,7 @@ export function SdkTests() {
   const handleSolanaRequest = async (title: string, method: string, args?: unknown[]) => {
     await runTest(title, async () => {
       const provider = ensureSolanaProvider();
-      const fn = provider[method];
-      if (typeof fn !== "function") {
-        throw new Error(`${method} is not available on the Solana provider.`);
-      }
-      return (fn as (...args: unknown[]) => Promise<unknown> | unknown)(...(args ?? []));
+      return invokeSolanaProviderMethod(provider, method, args);
     });
   };
 
@@ -470,8 +506,7 @@ export function SdkTests() {
 
       for (const method of ["solana_getAccounts", "getAccounts", "getPublicKey", "solana_requestAccounts"]) {
         try {
-          const result = await requestSolanaProvider(provider, method);
-          const accountPublicKey = getSolanaPublicKeyFromAccounts(result);
+          const accountPublicKey = await getSolanaPublicKeyFromProviderMethod(provider, method);
           if (accountPublicKey) {
             return accountPublicKey;
           }
