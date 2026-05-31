@@ -19,6 +19,62 @@ type ChainsResult = Awaited<ReturnType<typeof getChains>>;
 
 const createLogId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
+const getSolanaPublicKeyString = (value: unknown): string | null => {
+  if (!value) return null;
+  if (typeof value === "string") return value;
+  if (typeof value !== "object") return null;
+
+  const publicKey = value as {
+    address?: unknown;
+    publicKey?: unknown;
+    pubkey?: unknown;
+    toString?: () => string;
+  };
+
+  if (typeof publicKey.pubkey === "string") return publicKey.pubkey;
+  if (typeof publicKey.address === "string") return publicKey.address;
+  if (typeof publicKey.publicKey === "string") return publicKey.publicKey;
+
+  const resultPublicKey = getSolanaPublicKeyFromAccounts((publicKey as { result?: unknown }).result);
+  if (resultPublicKey) return resultPublicKey;
+
+  const accountsPublicKey = getSolanaPublicKeyFromAccounts((publicKey as { accounts?: unknown }).accounts);
+  if (accountsPublicKey) return accountsPublicKey;
+
+  const nestedPublicKey = getSolanaPublicKeyString(publicKey.publicKey);
+  if (nestedPublicKey) return nestedPublicKey;
+
+  if (typeof publicKey.toString === "function") {
+    const text = publicKey.toString();
+    return text && text !== "[object Object]" ? text : null;
+  }
+
+  return null;
+};
+
+const getSolanaPublicKeyFromAccounts = (accounts: unknown): string | null => {
+  const account = Array.isArray(accounts) ? accounts[0] : accounts;
+  return getSolanaPublicKeyString(account);
+};
+
+const requestSolanaProvider = async (
+  provider: Record<string, unknown>,
+  method: string,
+  params?: unknown[],
+): Promise<unknown> => {
+  const request = provider.request;
+  if (typeof request === "function") {
+    return request.call(provider, { method, params });
+  }
+
+  const fn = provider[method];
+  if (typeof fn === "function") {
+    return fn.apply(provider, params ?? []);
+  }
+
+  return undefined;
+};
+
 const getSwitchableEvmChains = (source?: Chain[]) => {
   const byId = new Map<string, Chain>();
   [dogeOSTestnet, ...(source ?? [])].forEach((chain) => {
@@ -405,13 +461,26 @@ export function SdkTests() {
     ]);
 
   const handleSolanaPublicKey = () =>
-    runTest("SOL: publicKey", () => {
+    runTest("SOL: publicKey", async () => {
       const provider = ensureSolanaProvider();
-      const publicKey = provider.publicKey as { toString?: () => string } | string | null | undefined;
-      if (!publicKey) {
-        throw new Error("publicKey is not available on the Solana provider.");
+      const publicKey = getSolanaPublicKeyString(provider.publicKey);
+      if (publicKey) {
+        return publicKey;
       }
-      return typeof publicKey === "string" ? publicKey : publicKey.toString?.();
+
+      for (const method of ["solana_getAccounts", "getAccounts", "getPublicKey", "solana_requestAccounts"]) {
+        try {
+          const result = await requestSolanaProvider(provider, method);
+          const accountPublicKey = getSolanaPublicKeyFromAccounts(result);
+          if (accountPublicKey) {
+            return accountPublicKey;
+          }
+        } catch {
+          // Try the next provider shape.
+        }
+      }
+
+      throw new Error("No Solana public key found on the provider.");
     });
 
   const handleSolanaSignMessage = () =>

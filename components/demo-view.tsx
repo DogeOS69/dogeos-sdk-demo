@@ -6,7 +6,7 @@ import { Button, useTheme } from "@tomo-inc/tomo-ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { arbitrum, base, bsc, linea, mainnet, optimism, polygon } from "viem/chains";
-import { DOGEOS_DEMO_ICON_URL, dogeOSTestnet, getDogeOSDemoMetadata } from "./dogeos-testnet";
+import { DOGEOS_DEMO_ICON_URL, dogeOSTestnet, getDogeOSDemoMetadata, solanaMainnet } from "./dogeos-testnet";
 import { HomePage } from "./home-page";
 
 const Ethereum = ({ className }: { className?: string }) => (
@@ -53,27 +53,6 @@ const recommonedChains = {
       name: "Dogecoin",
     },
   ],
-};
-
-const solanaMainnet: Chain = {
-  id: "solana:mainnet-beta",
-  name: "Solana",
-  nativeCurrency: {
-    name: "SOL",
-    symbol: "SOL",
-    decimals: 9,
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://api.mainnet-beta.solana.com"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Solana Explorer",
-      url: "https://explorer.solana.com",
-    },
-  },
 };
 
 export function DemoView() {
