@@ -42,6 +42,13 @@ const formatPayload = (value: unknown) => {
   }
 };
 
+const getChainLogPrefix = (chainType?: string | null) => {
+  if (chainType === ChainTypeEnum.EVM) return "EVM";
+  if (chainType === ChainTypeEnum.SOLANA) return "SOL";
+  if (chainType === ChainTypeEnum.DOGECOIN) return "DOGE";
+  return "Account";
+};
+
 export function SdkTests() {
   const {
     openModal,
@@ -166,7 +173,7 @@ export function SdkTests() {
   };
 
   const handleSignMessage = async () => {
-    await runTest("signMessage()", async () => {
+    await runTest(`${getChainLogPrefix(chainType)}: signMessage`, async () => {
       if (!signMessage) {
         throw new Error("signMessage is unavailable. Connect a wallet first.");
       }
@@ -178,7 +185,7 @@ export function SdkTests() {
   };
 
   const handleSignIn = async () => {
-    await runTest("signInWithWallet()", async () => {
+    await runTest(`${getChainLogPrefix(chainType)}: signInWithWallet`, async () => {
       if (!signInWithWallet) {
         throw new Error("signInWithWallet is unavailable. Connect a wallet first.");
       }
