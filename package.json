@@ -9,7 +9,7 @@
     "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind"
   },
   "dependencies": {
-    "@dogeos/dogeos-sdk": "3.3.0-beta.0",
+    "@dogeos/dogeos-sdk": "3.3.0-beta.1",
     "@tomo-inc/tomo-ui": "0.0.13",
     "create-hash": "^1.2.0",
     "json-bigint": "^1.0.0",

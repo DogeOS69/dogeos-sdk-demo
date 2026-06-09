@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@dogeos/dogeos-sdk':
-        specifier: 3.3.0-beta.0
-        version: 3.3.0-beta.0(@react-spectrum/provider@3.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@tanstack/query-core@5.100.6)(@types/react@19.2.9)(bufferutil@4.1.0)(ethers@6.13.5(bufferutil@4.1.0)(utf-8-validate@6.0.6))(expo@55.0.18)(framer-motion@11.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(got@11.8.6)(react-dom@18.3.1(react@18.3.1))(react-native@0.85.2(@babel/core@7.29.0)(@types/react@19.2.9)(bufferutil@4.1.0)(react@18.3.1)(utf-8-validate@6.0.6))(react@18.3.1)(starknet@6.24.1)(tailwindcss@4.2.4)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@6.0.6)(wagmi@3.4.1(@tanstack/query-core@5.100.6)(@tanstack/react-query@5.100.6(react@18.3.1))(@types/react@19.2.9)(ox@0.14.20(typescript@5.9.3)(zod@3.25.76))(react@18.3.1)(typescript@5.9.3)(viem@2.48.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@3.25.76)))(zod@3.25.76)
+        specifier: 3.3.0-beta.1
+        version: 3.3.0-beta.1(@react-spectrum/provider@3.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@tanstack/query-core@5.100.6)(@types/react@19.2.9)(bufferutil@4.1.0)(ethers@6.13.5(bufferutil@4.1.0)(utf-8-validate@6.0.6))(expo@55.0.18)(framer-motion@11.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(got@11.8.6)(react-dom@18.3.1(react@18.3.1))(react-native@0.85.2(@babel/core@7.29.0)(@types/react@19.2.9)(bufferutil@4.1.0)(react@18.3.1)(utf-8-validate@6.0.6))(react@18.3.1)(starknet@6.24.1)(tailwindcss@4.2.4)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@6.0.6)(wagmi@3.4.1(@tanstack/query-core@5.100.6)(@tanstack/react-query@5.100.6(react@18.3.1))(@types/react@19.2.9)(ox@0.14.20(typescript@5.9.3)(zod@3.25.76))(react@18.3.1)(typescript@5.9.3)(viem@2.48.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@3.25.76)))(zod@3.25.76)
       '@tomo-inc/tomo-ui':
         specifier: 0.0.13
         version: 0.0.13(@react-spectrum/provider@3.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@19.2.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@4.2.4)
@@ -723,8 +723,8 @@ packages:
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
 
-  '@dogeos/dogeos-sdk@3.3.0-beta.0':
-    resolution: {integrity: sha512-s33KDBZ/9Cz6sFL2/x4uy8y3CQUB3VZbn+ttB50VZP62Yhpl0k3iEpI+9TheyLl9owSzBjX0TeiviUuzlud9AA==}
+  '@dogeos/dogeos-sdk@3.3.0-beta.1':
+    resolution: {integrity: sha512-WXCQjklC3VTumImsQtrjHbVR9QlR4FYMOAuscA7sdXfuMfZPmWKdhDdGHWrrcwGaZmBsFnOkEQxxd9ZNDQD0CA==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
@@ -9201,7 +9201,7 @@ snapshots:
 
   '@discoveryjs/json-ext@0.5.7': {}
 
-  '@dogeos/dogeos-sdk@3.3.0-beta.0(@react-spectrum/provider@3.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@tanstack/query-core@5.100.6)(@types/react@19.2.9)(bufferutil@4.1.0)(ethers@6.13.5(bufferutil@4.1.0)(utf-8-validate@6.0.6))(expo@55.0.18)(framer-motion@11.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(got@11.8.6)(react-dom@18.3.1(react@18.3.1))(react-native@0.85.2(@babel/core@7.29.0)(@types/react@19.2.9)(bufferutil@4.1.0)(react@18.3.1)(utf-8-validate@6.0.6))(react@18.3.1)(starknet@6.24.1)(tailwindcss@4.2.4)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@6.0.6)(wagmi@3.4.1(@tanstack/query-core@5.100.6)(@tanstack/react-query@5.100.6(react@18.3.1))(@types/react@19.2.9)(ox@0.14.20(typescript@5.9.3)(zod@3.25.76))(react@18.3.1)(typescript@5.9.3)(viem@2.48.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@3.25.76)))(zod@3.25.76)':
+  '@dogeos/dogeos-sdk@3.3.0-beta.1(@react-spectrum/provider@3.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@tanstack/query-core@5.100.6)(@types/react@19.2.9)(bufferutil@4.1.0)(ethers@6.13.5(bufferutil@4.1.0)(utf-8-validate@6.0.6))(expo@55.0.18)(framer-motion@11.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(got@11.8.6)(react-dom@18.3.1(react@18.3.1))(react-native@0.85.2(@babel/core@7.29.0)(@types/react@19.2.9)(bufferutil@4.1.0)(react@18.3.1)(utf-8-validate@6.0.6))(react@18.3.1)(starknet@6.24.1)(tailwindcss@4.2.4)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@18.3.1))(utf-8-validate@6.0.6)(wagmi@3.4.1(@tanstack/query-core@5.100.6)(@tanstack/react-query@5.100.6(react@18.3.1))(@types/react@19.2.9)(ox@0.14.20(typescript@5.9.3)(zod@3.25.76))(react@18.3.1)(typescript@5.9.3)(viem@2.48.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@3.25.76)))(zod@3.25.76)':
     dependencies:
       '@heroui/system': 2.4.23(@heroui/theme@2.4.23(tailwindcss@4.2.4))(@react-spectrum/provider@3.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(framer-motion@11.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@heroui/theme': 2.4.23(tailwindcss@4.2.4)
