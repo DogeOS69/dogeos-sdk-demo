@@ -5,6 +5,6 @@ export default {
   address: "address",
   chainId: "chainId",
   chainType: "chainType",
-  balance: "balance",
+  balance: "Read Balances",
   currentProvider: "currentProvider",
 };

@@ -2,12 +2,13 @@
   "name": "dogeos-doc",
   "version": "0.0.0",
   "scripts": {
-    "dev": "next",
+    "dev": "next dev -p 5173",
     "dev:with-search": "pnpm build && pnpm dev",
     "build": "next build",
     "start": "next start",
     "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "node scripts/patch-nextra-theme.mjs"
   },
   "dependencies": {
     "@dogeos/dogeos-sdk": "4.0.0",
