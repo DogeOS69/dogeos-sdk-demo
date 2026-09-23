@@ -6,10 +6,11 @@
     "dev:with-search": "pnpm build && pnpm dev",
     "build": "next build",
     "start": "next start",
-    "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind"
+    "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@dogeos/dogeos-sdk": "3.3.0-beta.1",
+    "@dogeos/dogeos-sdk": "4.0.0",
     "@tomo-inc/tomo-ui": "0.0.13",
     "create-hash": "^1.2.0",
     "json-bigint": "^1.0.0",
@@ -33,5 +34,6 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "pagefind": "^1.4.0",
     "typescript": "~5.9.3"
-  }
+  },
+  "packageManager": "pnpm@10.28.2"
 }

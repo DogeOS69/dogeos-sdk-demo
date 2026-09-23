@@ -19,9 +19,6 @@ export default function nextConfig(phase) {
       "@tomo-inc/embedded-wallet-providers",
       "@tomo-inc/oidc-auth",
     ],
-    typescript: {
-      ignoreBuildErrors: true,
-    },
     turbopack: {
       root: resolve(__dirname, ".."),
     },

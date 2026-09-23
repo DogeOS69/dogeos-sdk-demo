@@ -6,7 +6,7 @@ import { Button, useTheme } from "@tomo-inc/tomo-ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { arbitrum, base, bsc, linea, mainnet, optimism, polygon } from "viem/chains";
-import { DOGEOS_DEMO_ICON_URL, dogeOSTestnet, getDogeOSDemoMetadata, solanaMainnet } from "./dogeos-testnet";
+import { DOGEOS_DEMO_ICON_URL, dogeOSTestnet, getDogeOSDemoMetadata, solanaChains, solanaMainnet } from "./dogeos-testnet";
 import { HomePage } from "./home-page";
 
 const Ethereum = ({ className }: { className?: string }) => (
@@ -38,12 +38,8 @@ type SocialLoginType = "google" | "x";
 
 const DOGEOS_CLIENT_ID =
   process.env.NEXT_PUBLIC_DOGEOS_CLIENT_ID ??
-  "mSzQLiebxpwV64barnRZpCGZTwB38kSiuszi42Cqq41fkRH8KM99dqG4pFNnvaVA4DV7zHsic0or0pd8tlMIt9vc";
-const DOGEOS_GOOGLE_CLIENT_ID =
-  process.env.NEXT_PUBLIC_DOGEOS_GOOGLE_CLIENT_ID ??
-  "362812706401-eppkpnqocdaejaf45ics815t22oe0j7l.apps.googleusercontent.com";
-const DOGEOS_X_CLIENT_ID =
-  process.env.NEXT_PUBLIC_DOGEOS_X_CLIENT_ID ?? "cTQxTUlSZXhwOXF6T2hnTHJVRzI6MTpjaQ";
+  process.env.NEXT_PUBLIC_CLIENT_ID ??
+  "tvmff3fh5I0raW9xMN9zW8wW8WX4uUE9hmYnmwVuzh8rJ7vkglUzsQnzOqeSC8vC39vhPTPUIJFK5DwyHBkRIk4M";
 const WALLETCONNECT_PROJECT_ID =
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "44cb8a6aedbe379ba8f2fa4fbc1a461f";
 
@@ -240,9 +236,9 @@ export function DemoView() {
     if (enableEmail) basicLogins.push("email");
     if (enableExternalWallets) basicLogins.push("externalWallets");
 
-    const socialLogins: Array<{ type: SocialLoginType; clientId?: string }> = [];
-    if (enableGoogle) socialLogins.push({ type: "google", clientId: DOGEOS_GOOGLE_CLIENT_ID });
-    if (enableX) socialLogins.push({ type: "x", clientId: DOGEOS_X_CLIENT_ID });
+    const socialLogins: Array<{ type: SocialLoginType }> = [];
+    if (enableGoogle) socialLogins.push({ type: "google" });
+    if (enableX) socialLogins.push({ type: "x" });
 
     const chains: WalletConnectKitConfig["chains"] = {};
     if (enableEvm) {
@@ -258,7 +254,7 @@ export function DemoView() {
       ] as unknown as Chain[];
     }
     if (enableSolana) {
-      chains.solana = [solanaMainnet];
+      chains.solana = solanaChains;
     }
     if (enableDogecoin) {
       (chains as Record<string, unknown>).dogecoin = recommonedChains.dogecoin;
@@ -347,9 +343,9 @@ export function DemoView() {
     if (enableEmail) basicLogins.push("email");
     if (enableExternalWallets) basicLogins.push("externalWallets");
 
-    const socialLogins: Array<{ type: SocialLoginType; clientId: string }> = [];
-    if (enableGoogle) socialLogins.push({ type: "google", clientId: "YOUR_GOOGLE_CLIENT_ID" });
-    if (enableX) socialLogins.push({ type: "x", clientId: "YOUR_X_CLIENT_ID" });
+    const socialLogins: Array<{ type: SocialLoginType }> = [];
+    if (enableGoogle) socialLogins.push({ type: "google" });
+    if (enableX) socialLogins.push({ type: "x" });
 
     const chainsConfig: Record<string, unknown> = {};
     if (enableEvm) {
@@ -456,7 +452,7 @@ ${jsonString}
 
 ### login
 - **basicLogins**: Array of basic login methods (\`"email"\`, \`"externalWallets"\`)
-- **socialLogins**: Array of social login providers with provider client IDs
+- **socialLogins**: Array of provider selectors (Google or X); OAuth client IDs are managed by DogeOS
 
 ### theme
 - **prefix**: CSS prefix for theme classes (default: \`"heroui"\`)
