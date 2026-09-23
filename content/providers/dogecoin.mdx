@@ -89,7 +89,7 @@ function GetAccounts() {
 
 Returns the current balance of the connected Dogecoin wallet.
 
-**Returns:** `Promise<{ balance: number }>` - Object containing the balance in satoshi
+**Returns:** An object with `confirmed`, `unconfirmed`, and `total` amounts in satoshis. Values may be decimal strings; use a bigint-aware formatter when displaying DOGE.
 
 **Example:**
 
@@ -104,8 +104,7 @@ function GetBalance() {
     
     try {
       const result = await currentProvider.getBalance();
-      console.log("Balance:", result.balance); // Balance in satoshi
-      // To convert to DOGE: result.balance / 100000000
+      console.log("Total balance in satoshis:", result.total);
     } catch (error) {
       console.error("Failed:", error);
     }
@@ -245,8 +244,7 @@ export function DogecoinProviderExample() {
   const handleGetBalance = async () => {
     try {
       const result = await currentProvider.getBalance();
-      const balanceInDoge = result.balance / 100000000;
-      console.log(`Balance: ${balanceInDoge} DOGE`);
+      console.log("Total balance in satoshis:", result.total);
     } catch (error) {
       console.error("Error:", error);
     }

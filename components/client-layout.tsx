@@ -36,7 +36,7 @@ export function ClientLayout({ pageMap, children, content }: ClientLayoutProps) 
         <Layout
           navbar={<NavbarWithActions />}
           pageMap={pageMap}
-          docsRepositoryBase="https://github.com/tomo-inc/tomo-wallet/tree/main/packages/wallet-connect-kit#readme"
+          docsRepositoryBase="https://github.com/DogeOS69/dogeos-sdk-demo/tree/main"
           footer={footer}
           sidebar={{ autoCollapse: true }}
           darkMode={true}

@@ -1,40 +1,66 @@
-# balance
+# Read Balances
 
-The balance of the connected wallet in decimal format. This is the native token balance (e.g., ETH for Ethereum, DOGE for Dogecoin).
+Use `currentProvider` from `useAccount()` to read the connected wallet's native token balance. Balance requests use the active chain, so request a fresh balance after changing accounts or networks.
 
-## Property
-
-`balance?: string`
-
-## Type
-
-`string | undefined` - Balance in decimal format (e.g., "1.5", "0.0")
-
-## Usage
+## EVM
 
 ```tsx
 import { useAccount } from "@dogeos/dogeos-sdk";
 
-function BalanceDisplay() {
-  const { balance, address } = useAccount();
+export function EvmBalanceButton() {
+  const { address, chainType, currentProvider } = useAccount();
 
-  if (!address) {
-    return <div>Not connected</div>;
+  async function readBalance() {
+    if (!address || chainType !== "evm" || !currentProvider) return;
+    try {
+      const balanceHex = await currentProvider.request({
+        method: "eth_getBalance",
+        params: [address, "latest"],
+      });
+      console.log("Balance in base units:", BigInt(balanceHex));
+    } catch (error) {
+      console.error("Could not read balance:", error);
+    }
   }
 
-  return <div>Balance: {balance || "0.0"}</div>;
+  return (
+    <button disabled={!address || chainType !== "evm" || !currentProvider} onClick={readBalance}>
+      Read EVM balance
+    </button>
+  );
 }
 ```
 
-## Notes
+The result is a hexadecimal quantity in the chain's smallest unit. DogeOS Chikyū uses 18 decimal places for DOGE. Use a bigint-aware formatter when converting the result for display.
 
-- Returns `undefined` if wallet is not connected or balance is not available
-- Balance is in decimal format, not wei or smallest unit
-- Balance may not be automatically updated - you may need to refresh or poll for updates
-- Format depends on the native currency of the chain
+## Dogecoin
 
-## Related Properties
+The Dogecoin provider's `getBalance()` returns `confirmed`, `unconfirmed`, and `total` amounts in satoshis. One DOGE is 100,000,000 satoshis.
 
-- `address` - Wallet address
-- `chainType` - Current chain type
-- `chainId` - Current chain ID
+```tsx
+import { useAccount } from "@dogeos/dogeos-sdk";
+
+export function DogecoinBalanceButton() {
+  const { address, chainType, currentProvider } = useAccount();
+  const canReadBalance = Boolean(address) && chainType === "dogecoin" &&
+    currentProvider != null && typeof currentProvider.getBalance === "function";
+
+  async function readBalance() {
+    if (!canReadBalance || !currentProvider) return;
+    try {
+      const balance = await currentProvider.getBalance();
+      console.log("Total balance in satoshis:", balance.total);
+    } catch (error) {
+      console.error("Could not read balance:", error);
+    }
+  }
+
+  return <button disabled={!canReadBalance} onClick={readBalance}>Read Dogecoin balance</button>;
+}
+```
+
+## Related Methods
+
+- [EVM provider](/providers/evm#eth_getbalance)
+- [Dogecoin provider](/providers/dogecoin#getbalance)
+- [Current provider](/hooks/useAccount/currentProvider)

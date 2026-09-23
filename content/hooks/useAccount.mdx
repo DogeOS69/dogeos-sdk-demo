@@ -200,25 +200,7 @@ The type of blockchain the wallet is currently connected to.
 
 ### balance
 
-The balance of the connected wallet in decimal format (native token balance).
-
-**Type:** `string | undefined`
-
-**Example:**
-
-```tsx
-import { useAccount } from "@dogeos/dogeos-sdk";
-
-function BalanceDisplay() {
-  const { balance, address } = useAccount();
-
-  if (!address) {
-    return <div>Not connected</div>;
-  }
-
-  return <div>Balance: {balance || "0.0"}</div>;
-}
-```
+Read live balances through `currentProvider`. Use `eth_getBalance` for EVM wallets and `getBalance()` for Dogecoin wallets. See [Read Balances](/hooks/useAccount/balance) for examples.
 
 ### currentProvider
 
@@ -279,7 +261,6 @@ export function AccountInfo() {
     address,
     chainId,
     chainType,
-    balance,
     signMessage,
     signInWithWallet,
     switchChain,
@@ -318,7 +299,6 @@ export function AccountInfo() {
       <div>Address: {address}</div>
       <div>Chain ID: {chainId}</div>
       <div>Chain Type: {chainType}</div>
-      <div>Balance: {balance}</div>
       <button onClick={handleSignMessage}>Sign Message</button>
       <button onClick={handleSignIn}>Sign In</button>
       {switchChain && (

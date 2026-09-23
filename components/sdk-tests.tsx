@@ -160,7 +160,7 @@ export function SdkTests() {
     isWalletLoading,
     error,
   } = useWalletConnect();
-  const { address, balance, chainId, chainType, signMessage, signInWithWallet, switchChain, currentProvider, currentWallet } =
+  const { address, chainId, chainType, signMessage, signInWithWallet, switchChain, currentProvider, currentWallet } =
     useAccount();
   const [logs, setLogs] = useState<TestLogEntry[]>([]);
   const [chains, setChains] = useState<ChainsResult | null>(null);
@@ -666,10 +666,6 @@ export function SdkTests() {
             <div className="rounded-lg border border-content2 bg-content1 px-3 py-2">
               <div className="text-[10px] font-medium text-foreground/60 mb-0.5">Chain</div>
               <div className="text-xs font-medium">{chainType ? `${chainType} / ${chainId ?? "—"}` : "—"}</div>
-            </div>
-            <div className="rounded-lg border border-content2 bg-content1 px-3 py-2">
-              <div className="text-[10px] font-medium text-foreground/60 mb-0.5">Balance</div>
-              <div className="text-xs font-medium">{balance ?? "—"}</div>
             </div>
             {error && (
               <div className="rounded-lg border border-danger bg-danger/10 px-3 py-2">
