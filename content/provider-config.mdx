@@ -1,6 +1,6 @@
 # Provider Configuration
 
-The `WalletConnectProvider` accepts a configuration object to customize the SDK's behavior. This document describes all available configuration parameters.
+The `WalletConnectProvider` accepts a configuration object to customize the SDK's behavior. This document describes the main configuration parameters for SDK 4.0.0.
 
 ## Configuration Interface
 
@@ -19,9 +19,6 @@ interface WalletConnectKitConfig {
   };
   theme?: ThemeConfig;
   login?: UserLoginConfig;
-  embeddedWalletConfig?: {
-    stage?: EmbeddedWalletStage;
-  };
 }
 ```
 
@@ -278,7 +275,7 @@ export function App() {
 
 ### login
 
-Login configuration for social and basic login methods.
+Login configuration for social and basic login methods. In SDK 4, social login entries select providers only. DogeOS manages their OAuth client IDs; consumer-supplied provider client IDs are ignored. Service destinations and the embedded-wallet environment are compiled into the published SDK and cannot be overridden with provider configuration.
 
 **Type:** `UserLoginConfig`
 
@@ -292,7 +289,6 @@ type BasicLoginType = "email" | "externalWallets";
 
 type SocialLoginProvider = {
   type: "google" | "x";
-  clientId?: string;
 };
 ```
 
@@ -311,11 +307,9 @@ const config = {
     socialLogins: [
       {
         type: "google",
-        clientId: "your-google-client-id",
       },
       {
         type: "x",
-        clientId: "your-x-client-id",
       },
     ],
   },
@@ -396,8 +390,8 @@ export function App() {
     login: {
       basicLogins: ["email", "externalWallets"],
       socialLogins: [
-        { type: "google", clientId: "your-google-client-id" },
-        { type: "x", clientId: "your-x-client-id" },
+        { type: "google" },
+        { type: "x" },
       ],
     },
   };

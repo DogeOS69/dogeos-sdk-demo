@@ -1,6 +1,6 @@
 # DogeOS SDK Demo
 
-Interactive demo and reference site for `@dogeos/dogeos-sdk`.
+Interactive demo and reference site for `@dogeos/dogeos-sdk@4.0.0`.
 
 ## Getting Started
 
@@ -17,14 +17,15 @@ The demo includes DogeOS public client ID defaults so it can run locally without
 
 ```bash
 NEXT_PUBLIC_DOGEOS_CLIENT_ID=
-NEXT_PUBLIC_DOGEOS_GOOGLE_CLIENT_ID=
-NEXT_PUBLIC_DOGEOS_X_CLIENT_ID=
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=
 ```
+
+Google and X are selected with `{ type: "google" }` and `{ type: "x" }`. SDK 4 owns their OAuth configuration and service destinations; the old provider client ID environment variables are no longer used.
 
 ## Build
 
 ```bash
+pnpm typecheck
 pnpm build
 pnpm start
 ```

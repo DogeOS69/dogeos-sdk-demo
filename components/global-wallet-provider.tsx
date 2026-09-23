@@ -4,16 +4,11 @@ import type { WalletConnectKitConfig } from "@dogeos/dogeos-sdk";
 import { WalletConnectProvider } from "@dogeos/dogeos-sdk";
 import React, { useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
-import { dogeOSTestnet, getDogeOSDemoMetadata, solanaMainnet } from "./dogeos-testnet";
+import { dogeOSTestnet, getDogeOSDemoMetadata, solanaChains } from "./dogeos-testnet";
 
 const DOGEOS_CLIENT_ID =
   process.env.NEXT_PUBLIC_DOGEOS_CLIENT_ID ??
   "mSzQLiebxpwV64barnRZpCGZTwB38kSiuszi42Cqq41fkRH8KM99dqG4pFNnvaVA4DV7zHsic0or0pd8tlMIt9vc";
-const DOGEOS_GOOGLE_CLIENT_ID =
-  process.env.NEXT_PUBLIC_DOGEOS_GOOGLE_CLIENT_ID ??
-  "362812706401-eppkpnqocdaejaf45ics815t22oe0j7l.apps.googleusercontent.com";
-const DOGEOS_X_CLIENT_ID =
-  process.env.NEXT_PUBLIC_DOGEOS_X_CLIENT_ID ?? "cTQxTUlSZXhwOXF6T2hnTHJVRzI6MTpjaQ";
 const WALLETCONNECT_PROJECT_ID =
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "44cb8a6aedbe379ba8f2fa4fbc1a461f";
 
@@ -61,14 +56,14 @@ export function GlobalWalletProvider({ children }: { children: React.ReactNode }
       clientId: DOGEOS_CLIENT_ID,
       chains: {
         evm: [dogeOSTestnet, mainnet],
-        solana: [solanaMainnet],
+        solana: solanaChains,
       },
       metadata: getDogeOSDemoMetadata(),
       login: {
         basicLogins: ["email", "externalWallets"],
         socialLogins: [
-          { type: "google", clientId: DOGEOS_GOOGLE_CLIENT_ID },
-          { type: "x", clientId: DOGEOS_X_CLIENT_ID },
+          { type: "google" },
+          { type: "x" },
         ],
       },
       theme: {

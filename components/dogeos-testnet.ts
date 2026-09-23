@@ -51,4 +51,8 @@ export const solanaMainnet = {
       url: "https://explorer.solana.com",
     },
   },
-} as const satisfies Chain;
+} as const satisfies Omit<Chain, "id"> & { id: `solana:${string}` };
+
+// SDK 4 accepts CAIP-2 Solana IDs at runtime, but its public Chain type
+// still declares a numeric ID. Keep the assertion at the provider boundary.
+export const solanaChains = [solanaMainnet] as unknown as Chain[];
