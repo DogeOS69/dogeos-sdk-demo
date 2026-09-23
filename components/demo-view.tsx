@@ -38,7 +38,8 @@ type SocialLoginType = "google" | "x";
 
 const DOGEOS_CLIENT_ID =
   process.env.NEXT_PUBLIC_DOGEOS_CLIENT_ID ??
-  "mSzQLiebxpwV64barnRZpCGZTwB38kSiuszi42Cqq41fkRH8KM99dqG4pFNnvaVA4DV7zHsic0or0pd8tlMIt9vc";
+  process.env.NEXT_PUBLIC_CLIENT_ID ??
+  "tvmff3fh5I0raW9xMN9zW8wW8WX4uUE9hmYnmwVuzh8rJ7vkglUzsQnzOqeSC8vC39vhPTPUIJFK5DwyHBkRIk4M";
 const WALLETCONNECT_PROJECT_ID =
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "44cb8a6aedbe379ba8f2fa4fbc1a461f";
 
