@@ -1,6 +1,6 @@
 # signInWithWallet
 
-Signs in with the wallet using SIW (Sign-In with Wallet) protocol. This generates a signature that can be used for authentication and getting a token.
+Builds and signs a wallet challenge. For EVM accounts, SDK 4.0.1 constructs a standard SIWE message for the connected account and selected chain. The result is a signature only: this method does not verify it with your backend, return an authentication token, or create an application session.
 
 ## Method
 
@@ -10,19 +10,22 @@ Signs in with the wallet using SIW (Sign-In with Wallet) protocol. This generate
 
 ```typescript
 interface SignInParams {
-  scheme?: string; // Protocol scheme (e.g., "https")
-  domain?: string; // Domain name
-  statement?: string; // Statement to sign
+  scheme?: "https" | "http"; // Protocol scheme
+  domain: string; // Domain name
+  uri?: string; // Authentication URI
+  address?: string; // Must match the connected account
+  chainId?: string; // Must match the selected EVM chain
+  statement: string; // Statement to sign
   version?: string; // Protocol version (e.g., "1")
-  nonce?: string; // Random nonce
+  nonce: string; // One-use server nonce for authentication
   issuedAt?: string; // ISO timestamp
-  resources?: string[]; // Optional resources
+  resources?: `https://${string}`[]; // Optional resources
 }
 ```
 
 ## Returns
 
-`Promise<string | Uint8Array>` - The signature/token for authentication
+`Promise<string | Uint8Array>` - The wallet signature; not a session or authentication token
 
 ## Usage
 
@@ -34,23 +37,47 @@ function SignInButton() {
 
   const handleSignIn = async () => {
     try {
-      const token = await signInWithWallet();
-      console.log("Auth token:", token);
+      const signature = await signInWithWallet();
+      console.log("Demo signature (no session):", signature);
     } catch (error) {
       console.error("Sign in failed:", error);
     }
   };
 
-  return <button onClick={handleSignIn}>Sign In</button>;
+  return <button onClick={handleSignIn}>Sign Demo Challenge</button>;
 }
 ```
 
-## Notes
+## Production authentication
 
-- This will show a modal/popup for the user to approve
-- The signature can be sent to your backend for authentication
-- Follows the SIW (Sign-In with Wallet) standard
-- Parameters are optional, defaults will be used if not provided
+Your server must issue an unpredictable, one-use, expiring challenge bound to the intended address, chain, domain, and URI. Sign on the actual selected EVM chain, including DogeOS Testnet where supported; do not silently substitute another chain.
+
+If your backend returns the complete SIWE message, sign its **exact bytes** with `signMessage({ message })`. Do not parse and reconstruct it with `signInWithWallet`: that can change fields or formatting. Send the original message and signature back to your server. Only after the server verifies the signature, nonce, expiry, origin, address, and chain should it create an authenticated session. Reject or restart a challenge after the account or chain changes.
+
+The following helper only signs a server-provided message. Its caller must submit the returned proof to the real backend and await successful verification before marking the user signed in:
+
+```tsx
+import type { useAccount } from "@dogeos/dogeos-sdk";
+
+type SignMessage = NonNullable<ReturnType<typeof useAccount>["signMessage"]>;
+
+export async function signExactChallenge(signMessage: SignMessage, message: string) {
+  const signature = await signMessage({ message });
+  return { message, signature };
+}
+```
+
+If you use `signInWithWallet` to construct a challenge instead, pass the server-issued fields unchanged and ensure the server validates the exact SDK-generated message. See the public `SignInParams` type exported by `@dogeos/dogeos-sdk`.
+
+### Shipping build 644 compatibility
+
+Unchanged MyDoge build 644 restricts EVM message signing to Ethereum (chain ID 1). Apps that need signing on that build may request an Ethereum **server-authentication challenge** and explicitly switch with user approval. This avoids the network restriction only: build 644 also has a separate post-biometric Social Wallet failure, so successful signing still requires verification. The corrected next native release supports the actual selected EVM chain. Never relabel a contract operation or rewrite an EIP-712 domain to chain 1 as a workaround.
+
+## Demo behavior
+
+The SDK Tests panel's **Sign Demo SIWE (EVM)** action uses a fresh cryptographic nonce, displays the exact challenge, and returns its signature. It has no authentication backend and creates no session. The minimal usage above is also a signature demonstration, not production authentication.
+
+Wallet connection (`isConnected`) and embedded-wallet readiness (`isWalletReady`) are distinct from an authenticated application session. Injected MyDoge signing does not require embedded-wallet readiness.
 
 ## Errors
 

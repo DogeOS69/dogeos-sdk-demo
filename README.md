@@ -1,11 +1,11 @@
 # DogeOS SDK Demo
 
-Interactive demo and reference site for `@dogeos/dogeos-sdk@4.0.0`.
+Interactive demo and reference site for `@dogeos/dogeos-sdk@4.0.1`.
 
 ## Getting Started
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 pnpm dev
 ```
 
@@ -28,6 +28,14 @@ The SDK Tests panel runs requests against the connected wallet and displays thei
 - Solana account retrieval and message signing.
 
 Connect the corresponding wallet before running its actions. Balance actions read through the wallet provider; EVM results use hexadecimal base units and Dogecoin results include `confirmed`, `unconfirmed`, and `total` amounts in satoshis.
+
+## Native connection and signing
+
+SDK 4.0.1 gives the injected MyDoge wallet precedence inside the native app and does not initialize an embedded-wallet iframe there. Ordinary browsers retain the configured email, Google, X, and external-wallet options. No private capability flags or separate native provider configuration are required.
+
+`isConnected` describes a wallet connection. `walletStatus` and `isWalletReady` describe the embedded wallet, and are not prerequisites for injected-wallet signing or proof of an authenticated application session.
+
+The **Sign Demo SIWE (EVM)** action creates a cryptographically random demo nonce, displays the exact challenge for the current account and chain, and calls `signInWithWallet`. It returns a signature only; this demo has no authentication backend. Production applications must issue a one-use server challenge and verify the exact message, signature, address, chain, origin, nonce, and expiry before establishing a session. See the [signing reference](content/hooks/useAccount/signInWithWallet.mdx).
 
 ## Build
 

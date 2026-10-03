@@ -1,6 +1,33 @@
 # Provider Configuration
 
-The `WalletConnectProvider` accepts a configuration object to customize the SDK's behavior. This document describes the main configuration parameters for SDK 4.0.0.
+The `WalletConnectProvider` accepts a configuration object to customize the SDK's behavior. This document describes the main configuration parameters for SDK 4.0.1.
+
+## Native MyDoge routing
+
+With SDK 4.0.1, the injected MyDoge wallet takes precedence inside the native app. The SDK waits for native discovery, connects through the injected provider, and does not initialize the embedded-wallet iframe in that path. Cancellation leaves the wallet picker available for an explicit retry; it does not fall back to embedded custody.
+
+Keep ordinary-browser email and social login configured. Do not globally force `externalWallets` only, mount an additional embedded wallet in the native path, or depend on private native properties. For example, this same configuration supports both contexts:
+
+```tsx
+import { WalletConnectProvider } from "@dogeos/dogeos-sdk";
+import type { WalletConnectKitConfig } from "@dogeos/dogeos-sdk";
+
+const config: WalletConnectKitConfig = {
+  clientId: "your-client-id",
+  login: {
+    basicLogins: ["email", "externalWallets"],
+    socialLogins: [{ type: "google" }, { type: "x" }],
+  },
+};
+
+export function App() {
+  return <WalletConnectProvider config={config}><YourApp /></WalletConnectProvider>;
+}
+```
+
+Use `isConnected` and the current `useAccount()` values for injected-wallet actions. `isWalletReady` and `walletStatus` describe embedded custody; none of these states proves a backend-authenticated application session. Native auto-connect preserves the wallet's current supported chain when the app has not explicitly requested another chain.
+
+For apps still running unchanged MyDoge build 644, see the [temporary signing compatibility guidance](/hooks/useAccount/signInWithWallet#shipping-build-644-compatibility). SDK 4.0.1 does not remove that build's native signing restrictions or its separate post-biometric Social Wallet failure.
 
 ## Configuration Interface
 
@@ -89,11 +116,12 @@ Default chain type to connect to when the user opens the wallet modal.
 **Example:**
 
 ```tsx
-import { WalletConnectProvider } from "@dogeos/dogeos-sdk";
+import { ChainTypeEnum, WalletConnectProvider } from "@dogeos/dogeos-sdk";
+import type { WalletConnectKitConfig } from "@dogeos/dogeos-sdk";
 
-const config = {
+const config: WalletConnectKitConfig = {
   clientId: "your-client-id",
-  defaultConnectChain: "evm", // or "dogecoin"
+  defaultConnectChain: ChainTypeEnum.EVM, // or ChainTypeEnum.DOGECOIN
 };
 
 export function App() {
@@ -296,8 +324,9 @@ type SocialLoginProvider = {
 
 ```tsx
 import { WalletConnectProvider } from "@dogeos/dogeos-sdk";
+import type { WalletConnectKitConfig } from "@dogeos/dogeos-sdk";
 
-const config = {
+const config: WalletConnectKitConfig = {
   clientId: "your-client-id",
   login: {
     // Basic login methods
@@ -329,6 +358,7 @@ export function App() {
 ```tsx
 import {
   WalletConnectProvider,
+  ChainTypeEnum,
   getChains,
   getConnectors,
 } from "@dogeos/dogeos-sdk";
@@ -353,7 +383,7 @@ export function App() {
   const config: WalletConnectKitConfig = {
     connectors,
     chains,
-    defaultConnectChain: "evm",
+    defaultConnectChain: ChainTypeEnum.EVM,
     walletConnectProjectId: "your-project-id",
     clientId: "your-client-id",
     metadata: {

@@ -49,23 +49,26 @@ function SignMessageButton() {
 
 ### signInWithWallet()
 
-Signs in with the wallet using SIW (Sign-In with Wallet) protocol. This generates a signature that can be used for authentication and getting a token.
+Builds and signs a wallet challenge. For EVM accounts, SDK 4.0.1 constructs a standard SIWE message for the connected account and selected chain. The result is a signature only: this method does not verify it with your backend, return an authentication token, or create an application session.
 
 **Parameters:**
 
 ```typescript
 interface SignInParams {
-  scheme?: string; // Protocol scheme (e.g., "https")
-  domain?: string; // Domain name
-  statement?: string; // Statement to sign
+  scheme?: "https" | "http"; // Protocol scheme
+  domain: string; // Domain name
+  uri?: string; // Authentication URI
+  address?: string; // Must match the connected account
+  chainId?: string; // Must match the selected EVM chain
+  statement: string; // Statement to sign
   version?: string; // Protocol version (e.g., "1")
-  nonce?: string; // Random nonce
+  nonce: string; // One-use server nonce for authentication
   issuedAt?: string; // ISO timestamp
-  resources?: string[]; // Optional resources
+  resources?: `https://${string}`[]; // Optional resources
 }
 ```
 
-**Returns:** `Promise<string | Uint8Array>` - The signature/token for authentication
+**Returns:** `Promise<string | Uint8Array>` - The wallet signature; not a session or authentication token
 
 **Example:**
 
@@ -77,14 +80,14 @@ function SignInButton() {
 
   const handleSignIn = async () => {
     try {
-      const token = await signInWithWallet();
-      console.log("Auth token:", token);
+      const signature = await signInWithWallet();
+      console.log("Demo signature (no session):", signature);
     } catch (error) {
       console.error("Sign in failed:", error);
     }
   };
 
-  return <button onClick={handleSignIn}>Sign In</button>;
+  return <button onClick={handleSignIn}>Sign Demo Challenge</button>;
 }
 ```
 
@@ -273,7 +276,6 @@ export function AccountInfo() {
     try {
       const sig = await signMessage({
         message: "Hello World",
-        nonce: Math.random().toString(36).slice(2),
       });
       console.log("Signature:", sig);
     } catch (error) {
@@ -283,8 +285,8 @@ export function AccountInfo() {
 
   const handleSignIn = async () => {
     try {
-      const token = await signInWithWallet();
-      console.log("Token:", token);
+      const signature = await signInWithWallet();
+      console.log("Demo signature (no session):", signature);
     } catch (error) {
       console.error("Error:", error);
     }
@@ -300,7 +302,7 @@ export function AccountInfo() {
       <div>Chain ID: {chainId}</div>
       <div>Chain Type: {chainType}</div>
       <button onClick={handleSignMessage}>Sign Message</button>
-      <button onClick={handleSignIn}>Sign In</button>
+      <button onClick={handleSignIn}>Sign Demo Challenge</button>
       {switchChain && (
         <button onClick={() => switchChain({ chainType: "evm", chainInfo: {...} })}>
           Switch Chain

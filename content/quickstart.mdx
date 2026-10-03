@@ -7,7 +7,7 @@ Get started with DogeOS SDK in minutes. This guide will walk you through the bas
 ## Installation
 
 ```bash
-npm install @dogeos/dogeos-sdk
+npm install @dogeos/dogeos-sdk@4.0.1
 ```
 
 ## Basic Setup
@@ -32,6 +32,8 @@ export default function App() {
 
 **Note:** `clientId` is required for embedded wallet functionality. Get your client ID from [DogeOS](https://sdk.dogeos.com/).
 
+SDK 4.0.1 prefers the injected MyDoge wallet inside the native app and does not initialize an embedded-wallet iframe in that path. Keep your normal browser login configuration: email and social login remain available outside the native app. See [native routing](/provider-config#native-mydoge-routing).
+
 ### 2. Use the hooks
 
 The SDK provides two main hooks:
@@ -44,7 +46,8 @@ The SDK provides two main hooks:
 - **Provider**: Wrap your app with `WalletConnectProvider` to enable wallet functionality
 - **Hooks**: Use `useWalletConnect` and `useAccount` to interact with wallets
 - **Modal**: The SDK provides a built-in wallet selection modal
-- **Connection State**: Track connection status with `isConnected`
+- **Connection State**: Track wallet connection status with `isConnected`; it does not establish an authenticated app session.
+- **Embedded Readiness**: `walletStatus` and `isWalletReady` describe embedded custody, not an injected wallet. Do not gate native signing on them.
 
 ## Next Steps
 
@@ -129,8 +132,8 @@ export function AccountInfo() {
   };
 
   const onSignin = async () => {
-    const token = await signInWithWallet();
-    console.log("token:", token);
+    const signature = await signInWithWallet();
+    console.log("Demo signature (no session):", signature);
   };
 
   return (
@@ -138,8 +141,10 @@ export function AccountInfo() {
       <div>Address: {address}</div>
       <div>ChainId: {chainId}</div>
       <button onClick={onSignMessage}>Sign Message</button>
-      <button onClick={onSignin}>Sign In With Wallet</button>
+      <button onClick={onSignin}>Sign Demo Challenge</button>
     </div>
   );
 }
 ```
+
+`signInWithWallet` returns a signature, not an authentication token. For production authentication, use a one-use server challenge and backend verification as described in [signInWithWallet](/hooks/useAccount/signInWithWallet).

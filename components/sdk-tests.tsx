@@ -3,7 +3,9 @@
 import type { Chain } from "@dogeos/dogeos-sdk";
 import { ChainTypeEnum, getChains, getConnectors, useAccount, useWalletConnect } from "@dogeos/dogeos-sdk";
 import { Button } from "@tomo-inc/tomo-ui";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { getAddress } from "viem";
+import { createSiweMessage } from "viem/siwe";
 import { polygon } from "viem/chains";
 import { dogeOSTestnet } from "./dogeos-testnet";
 
@@ -152,8 +154,6 @@ export function SdkTests() {
     disconnect,
     connect,
     isConnected,
-    isConnecting,
-    isDisconnected,
     connectionStatus,
     walletStatus,
     isWalletReady,
@@ -162,6 +162,11 @@ export function SdkTests() {
   } = useWalletConnect();
   const { address, chainId, chainType, signMessage, signInWithWallet, switchChain, currentProvider, currentWallet } =
     useAccount();
+  const currentAccount = useRef({ address, chainId, chainType });
+  currentAccount.current = { address, chainId, chainType };
+  const signingDemo = useRef(false);
+  const [isSigningDemo, setIsSigningDemo] = useState(false);
+  const [demoSiweMessage, setDemoSiweMessage] = useState("");
   const [logs, setLogs] = useState<TestLogEntry[]>([]);
   const [chains, setChains] = useState<ChainsResult | null>(null);
   const [messageToSign, setMessageToSign] = useState("Hello DogeOS");
@@ -281,32 +286,52 @@ export function SdkTests() {
   };
 
   const handleSignIn = async () => {
-    await runTest(`${getChainLogPrefix(chainType)}: signInWithWallet`, async () => {
-      if (!signInWithWallet) {
-        throw new Error("signInWithWallet is unavailable. Connect a wallet first.");
-      }
-      if (typeof window === "undefined") {
-        return signInWithWallet();
-      }
-      const scheme = window.location.protocol === "https:" ? "https" : "http";
-      const domain = window.location.host;
-      const uri = window.location.origin;
-      const normalizedChainId =
-        chainType === "evm" && chainId
-          ? chainId.startsWith("0x")
-            ? Number.parseInt(chainId, 16).toString()
-            : chainId
-          : undefined;
-      return signInWithWallet({
-        scheme,
-        domain,
-        uri,
-        chainId: normalizedChainId,
-        address,
-        statement: "Sign in with DogeOS SDK",
-        nonce: Math.random().toString(36).slice(2),
+    if (signingDemo.current) return;
+    signingDemo.current = true;
+    setIsSigningDemo(true);
+    try {
+      await runTest("EVM: demo SIWE signature (no session)", async () => {
+        if (!signInWithWallet || !address || chainType !== ChainTypeEnum.EVM) {
+          throw new Error("Connect an EVM wallet to sign the demo SIWE challenge.");
+        }
+        const selectedChainId = Number(chainId);
+        if (!Number.isSafeInteger(selectedChainId) || selectedChainId <= 0) {
+          throw new Error("The connected wallet must have a valid EVM chain ID.");
+        }
+        const challenge = {
+          scheme: window.location.protocol === "https:" ? "https" as const : "http" as const,
+          domain: window.location.host,
+          uri: window.location.origin,
+          address: getAddress(address),
+          chainId: selectedChainId,
+          version: "1" as const,
+          statement: "DogeOS SDK signature demonstration. This does not create an authenticated session.",
+          nonce: Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) =>
+            byte.toString(16).padStart(2, "0"),
+          ).join(""),
+          issuedAt: new Date(),
+        };
+        const message = createSiweMessage(challenge);
+        setDemoSiweMessage(message);
+        const signature = await signInWithWallet({
+          ...challenge,
+          chainId: String(challenge.chainId),
+          issuedAt: challenge.issuedAt.toISOString(),
+        });
+        const current = currentAccount.current;
+        if (
+          current.chainType !== ChainTypeEnum.EVM ||
+          current.address?.toLowerCase() !== challenge.address.toLowerCase() ||
+          Number(current.chainId) !== challenge.chainId
+        ) {
+          throw new Error("The wallet account or chain changed. Start a new demo challenge.");
+        }
+        return { message, signature, authenticated: false };
       });
-    });
+    } finally {
+      signingDemo.current = false;
+      setIsSigningDemo(false);
+    }
   };
 
   const resolveChains = async () => {
@@ -575,7 +600,7 @@ export function SdkTests() {
 
   const accountActions = [
     { id: "signMessage", label: "Sign Message", run: handleSignMessage },
-    { id: "signIn", label: "Sign In", run: handleSignIn },
+    { id: "signIn", label: "Sign Demo SIWE (EVM)", run: handleSignIn },
     { id: "switchChain", label: "Switch Chain", run: handleSwitchChain },
     { id: "connectDogecoin", label: "Connect Dogecoin", run: handleConnectDogecoin },
     { id: "connectSolana", label: "Connect Solana", run: handleConnectSolana },
@@ -650,13 +675,13 @@ export function SdkTests() {
               <div className="text-xs font-medium">{connectionStatus}</div>
             </div>
             <div className="rounded-lg border border-content2 bg-content1 px-3 py-2">
-              <div className="text-[10px] font-medium text-foreground/60 mb-0.5">Wallet</div>
+              <div className="text-[10px] font-medium text-foreground/60 mb-0.5">Embedded wallet</div>
               <div className="text-xs font-medium">{walletStatus}</div>
             </div>
             <div className="rounded-lg border border-content2 bg-content1 px-3 py-2">
-              <div className="text-[10px] font-medium text-foreground/60 mb-0.5">Ready</div>
+              <div className="text-[10px] font-medium text-foreground/60 mb-0.5">Embedded readiness</div>
               <div className="text-xs font-medium">
-                {isWalletReady ? "ready" : isWalletLoading ? "loading" : isConnecting ? "connecting" : isDisconnected ? "disconnected" : "idle"}
+                {isWalletReady ? "ready" : isWalletLoading ? "loading" : "not ready"}
               </div>
             </div>
             <div className="rounded-lg border border-content2 bg-content1 px-3 py-2">
@@ -813,11 +838,24 @@ export function SdkTests() {
               <Button
                 size="sm"
                 color="primary"
+                isDisabled={isSigningDemo}
                 onPress={() => runSelectedAction("Execute Account", accountActions, selectedAccountActionId)}
               >
                 Execute
               </Button>
             </div>
+          </section>
+
+          <section className="rounded-lg border border-content2 p-4 space-y-3">
+            <h3 className="text-sm font-semibold">Demo SIWE challenge</h3>
+            <p className="text-xs text-foreground/60">
+              Sign Demo SIWE uses the current EVM account and chain with a fresh cryptographic nonce.
+              This demonstration returns a signature only. It has no authentication backend and creates no session.
+              A real app must issue a one-use server challenge and verify its exact message and signature before creating a session.
+            </p>
+            {demoSiweMessage && (
+              <pre data-testid="demo-siwe-message" className="whitespace-pre-wrap break-words text-xs">{demoSiweMessage}</pre>
+            )}
           </section>
 
           <section className="rounded-lg border border-content2 p-4 space-y-4">
