@@ -2,6 +2,8 @@
 
 The `WalletConnectProvider` accepts a configuration object to customize the SDK's behavior. This document describes the main configuration parameters for SDK 4.0.1.
 
+Projects must provide their own DogeOS client ID from [DogeOS Console](https://console.dogeos.com) and their own [WalletConnect project ID](https://cloud.walletconnect.com). The demo's default DogeOS client ID is a sandbox client for localhost only.
+
 ## Native MyDoge routing
 
 With SDK 4.0.1, the injected MyDoge wallet takes precedence inside the native app. The SDK waits for native discovery, connects through the injected provider, and does not initialize the embedded-wallet iframe in that path. Cancellation leaves the wallet picker available for an explicit retry; it does not fall back to embedded custody.
@@ -14,6 +16,7 @@ import type { WalletConnectKitConfig } from "@dogeos/dogeos-sdk";
 
 const config: WalletConnectKitConfig = {
   clientId: "your-client-id",
+  walletConnectProjectId: "your-walletconnect-project-id",
   login: {
     basicLogins: ["email", "externalWallets"],
     socialLogins: [{ type: "google" }, { type: "x" }],
@@ -135,7 +138,7 @@ export function App() {
 
 ### walletConnectProjectId
 
-WalletConnect project ID. Make sure to replace the projectId with your own WalletConnect Project ID if you wish to use WalletConnect!
+Your project's WalletConnect project ID, required for WalletConnect connections. Register your application's origins in your WalletConnect project settings.
 
 **Type:** `string`
 
@@ -162,7 +165,7 @@ export function App() {
 
 ### clientId
 
-SDK client ID. This is required for embedded wallet functionality, including email passwordless login and social login features.
+Your project's DogeOS client ID. This is required for embedded wallet functionality, including email passwordless login and social login features. Register your application's origins in DogeOS Console.
 
 **Type:** `string`
 
@@ -192,7 +195,7 @@ export function App() {
 - Embedded wallet operations
 - User authentication and session management
 
-Get your client ID from [DogeOS](https://sdk.dogeos.com/) before using embedded wallet features.
+Get your own client ID from [DogeOS Console](https://console.dogeos.com) before using embedded wallet features in your project. The demo's default sandbox client works on localhost only.
 
 ### metadata
 
