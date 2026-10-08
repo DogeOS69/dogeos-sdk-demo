@@ -36,12 +36,13 @@ const Doge = ({ className }: { className?: string }) => (
 type BasicLoginType = "email" | "externalWallets";
 type SocialLoginType = "google" | "x";
 
+// Public sandbox client for localhost only. Projects must use their own IDs.
 const DOGEOS_CLIENT_ID =
   process.env.NEXT_PUBLIC_DOGEOS_CLIENT_ID ??
   process.env.NEXT_PUBLIC_CLIENT_ID ??
-  "tvmff3fh5I0raW9xMN9zW8wW8WX4uUE9hmYnmwVuzh8rJ7vkglUzsQnzOqeSC8vC39vhPTPUIJFK5DwyHBkRIk4M";
+  "mg7xe8v7rQ0hjU9cKsy22w1ixrds0fmKAI9UlCe8RBBxvOcspnxeh9pqutM4x5zrBrKR1V7HS1G7FmHiFB45wKVM";
 const WALLETCONNECT_PROJECT_ID =
-  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "44cb8a6aedbe379ba8f2fa4fbc1a461f";
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
 
 const recommonedChains = {
   dogecoin: [
@@ -467,10 +468,10 @@ ${jsonString}
 Network chains configuration (EVM, Dogecoin)
 
 ### clientId
-Your SDK client ID (required)
+Your project's client ID from [DogeOS Console](https://console.dogeos.com) (required). The demo's default client is a sandbox client for localhost only.
 
 ### walletConnectProjectId
-Your WalletConnect project ID (required)
+Your project's own [WalletConnect project ID](https://cloud.walletconnect.com) (required for WalletConnect connections).
 
 ### metadata
 App metadata for WalletConnect

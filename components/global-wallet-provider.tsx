@@ -6,12 +6,13 @@ import React, { useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 import { dogeOSTestnet, getDogeOSDemoMetadata, solanaChains } from "./dogeos-testnet";
 
+// Public sandbox client for localhost only. Projects must use their own IDs.
 const DOGEOS_CLIENT_ID =
   process.env.NEXT_PUBLIC_DOGEOS_CLIENT_ID ??
   process.env.NEXT_PUBLIC_CLIENT_ID ??
-  "tvmff3fh5I0raW9xMN9zW8wW8WX4uUE9hmYnmwVuzh8rJ7vkglUzsQnzOqeSC8vC39vhPTPUIJFK5DwyHBkRIk4M";
+  "mg7xe8v7rQ0hjU9cKsy22w1ixrds0fmKAI9UlCe8RBBxvOcspnxeh9pqutM4x5zrBrKR1V7HS1G7FmHiFB45wKVM";
 const WALLETCONNECT_PROJECT_ID =
-  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "44cb8a6aedbe379ba8f2fa4fbc1a461f";
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
 
 export function GlobalWalletProvider({ children }: { children: React.ReactNode }) {
   const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");

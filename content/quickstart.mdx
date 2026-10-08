@@ -12,6 +12,8 @@ npm install @dogeos/dogeos-sdk@4.0.1
 
 ## Basic Setup
 
+Create your own client ID in [DogeOS Console](https://console.dogeos.com) and your own [WalletConnect project ID](https://cloud.walletconnect.com). Register your application's origins with each service. The demo's default DogeOS client ID is a sandbox client for localhost only; use your project's IDs in your integration.
+
 ### 1. Wrap your app with WalletConnectProvider
 
 ```tsx
@@ -22,6 +24,7 @@ export default function App() {
     <WalletConnectProvider
       config={{
         clientId: "your-client-id",
+        walletConnectProjectId: "your-walletconnect-project-id",
       }}
     >
       <YourApp />
@@ -30,7 +33,7 @@ export default function App() {
 }
 ```
 
-**Note:** `clientId` is required for embedded wallet functionality. Get your client ID from [DogeOS](https://sdk.dogeos.com/).
+`clientId` enables embedded wallet features. `walletConnectProjectId` enables WalletConnect connections. Both IDs must belong to your project.
 
 SDK 4.0.1 prefers the injected MyDoge wallet inside the native app and does not initialize an embedded-wallet iframe in that path. Keep your normal browser login configuration: email and social login remain available outside the native app. See [native routing](/provider-config#native-mydoge-routing).
 
@@ -92,6 +95,7 @@ export default function App() {
     <WalletConnectProvider
       config={{
         clientId: "your-client-id",
+        walletConnectProjectId: "your-walletconnect-project-id",
       }}
     >
       <WalletDemo />
@@ -99,8 +103,6 @@ export default function App() {
   );
 }
 ```
-
-**Note:** Get your client ID from [DogeOS](https://sdk.dogeos.com/).
 
 ## Connect Button Example
 
