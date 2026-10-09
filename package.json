@@ -11,7 +11,7 @@
     "postinstall": "node scripts/patch-nextra-theme.mjs"
   },
   "dependencies": {
-    "@dogeos/dogeos-sdk": "4.0.1",
+    "@dogeos/dogeos-sdk": "4.0.2",
     "@tomo-inc/tomo-ui": "0.0.13",
     "create-hash": "^1.2.0",
     "json-bigint": "^1.0.0",
