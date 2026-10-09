@@ -1,6 +1,6 @@
 # DogeOS SDK Demo
 
-Interactive demo and reference site for `@dogeos/dogeos-sdk@4.0.1`.
+Interactive demo and reference site for `@dogeos/dogeos-sdk@4.0.2`.
 
 ## Getting Started
 
@@ -38,7 +38,7 @@ Connect the corresponding wallet before running its actions. Balance actions rea
 
 ## Native connection and signing
 
-SDK 4.0.1 gives the injected MyDoge wallet precedence inside the native app and does not initialize an embedded-wallet iframe there. Ordinary browsers retain the configured email, Google, X, and external-wallet options. No private capability flags or separate native provider configuration are required.
+SDK 4.0.2 gives the injected MyDoge wallet precedence inside the native app and does not initialize an embedded-wallet iframe there. Ordinary browsers retain the configured email, Google, X, and external-wallet options. No private capability flags or separate native provider configuration are required.
 
 `isConnected` describes a wallet connection. `walletStatus` and `isWalletReady` describe the embedded wallet, and are not prerequisites for injected-wallet signing or proof of an authenticated application session.
 
