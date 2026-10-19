@@ -1,6 +1,6 @@
 # DogeOS SDK Demo
 
-Interactive demo and reference site for `@dogeos/dogeos-sdk@4.0.2`.
+Interactive demo and reference site for `@dogeos/dogeos-sdk@4.0.4`.
 
 ## Getting Started
 
@@ -15,7 +15,7 @@ Open [http://localhost:5173](http://localhost:5173).
 
 The demo's default DogeOS client ID is a sandbox client for localhost only. Run it at `http://localhost:5173`. The SDK uses its default production services.
 
-Every project must provide its own DogeOS client ID from [DogeOS Console](https://console.dogeos.com) and its own [WalletConnect project ID](https://cloud.walletconnect.com). Register your application's origins with each service.
+For your own project, sign up at [DogeOS Console](https://console.dogeos.com) to create your own DogeOS client ID. You must also provide your own [WalletConnect project ID](https://cloud.walletconnect.com). Register your application's origins with each service.
 
 Set these values in `.env.local` before running or building your project:
 
@@ -38,7 +38,7 @@ Connect the corresponding wallet before running its actions. Balance actions rea
 
 ## Native connection and signing
 
-SDK 4.0.2 gives the injected MyDoge wallet precedence inside the native app and does not initialize an embedded-wallet iframe there. Ordinary browsers retain the configured email, Google, X, and external-wallet options. No private capability flags or separate native provider configuration are required.
+SDK 4.0.4 gives the injected MyDoge wallet precedence inside the native app and does not initialize an embedded-wallet iframe there. Ordinary browsers retain the configured email, Google, X, and external-wallet options. No private capability flags or separate native provider configuration are required.
 
 `isConnected` describes a wallet connection. `walletStatus` and `isWalletReady` describe the embedded wallet, and are not prerequisites for injected-wallet signing or proof of an authenticated application session.
 
