@@ -7,7 +7,7 @@ Get started with DogeOS SDK in minutes. This guide will walk you through the bas
 ## Installation
 
 ```bash
-npm install @dogeos/dogeos-sdk@4.0.1
+npm install @dogeos/dogeos-sdk@4.0.4
 ```
 
 ## Basic Setup
@@ -35,7 +35,7 @@ export default function App() {
 
 `clientId` enables embedded wallet features. `walletConnectProjectId` enables WalletConnect connections. Both IDs must belong to your project.
 
-SDK 4.0.1 prefers the injected MyDoge wallet inside the native app and does not initialize an embedded-wallet iframe in that path. Keep your normal browser login configuration: email and social login remain available outside the native app. See [native routing](/provider-config#native-mydoge-routing).
+The SDK prefers the injected MyDoge wallet inside the native app and does not initialize an embedded-wallet iframe in that path. Keep your normal browser login configuration: email and social login remain available outside the native app. See [native routing](/provider-config#native-mydoge-routing).
 
 ### 2. Use the hooks
 

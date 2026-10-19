@@ -1,12 +1,12 @@
 # Provider Configuration
 
-The `WalletConnectProvider` accepts a configuration object to customize the SDK's behavior. This document describes the main configuration parameters for SDK 4.0.1.
+The `WalletConnectProvider` accepts a configuration object to customize the SDK's behavior. This document describes the main configuration parameters for SDK 4.0.4.
 
 Projects must provide their own DogeOS client ID from [DogeOS Console](https://console.dogeos.com) and their own [WalletConnect project ID](https://cloud.walletconnect.com). The demo's default DogeOS client ID is a sandbox client for localhost only.
 
 ## Native MyDoge routing
 
-With SDK 4.0.1, the injected MyDoge wallet takes precedence inside the native app. The SDK waits for native discovery, connects through the injected provider, and does not initialize the embedded-wallet iframe in that path. Cancellation leaves the wallet picker available for an explicit retry; it does not fall back to embedded custody.
+The injected MyDoge wallet takes precedence inside the native app. The SDK waits for native discovery, connects through the injected provider, and does not initialize the embedded-wallet iframe in that path. Cancellation leaves the wallet picker available for an explicit retry; it does not fall back to embedded custody.
 
 Keep ordinary-browser email and social login configured. Do not globally force `externalWallets` only, mount an additional embedded wallet in the native path, or depend on private native properties. For example, this same configuration supports both contexts:
 
