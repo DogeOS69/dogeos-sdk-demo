@@ -1,0 +1,13 @@
+/*
+ * The demo's own Tailwind build. Before SDK 4.1.0 the SDK stylesheet styled
+ * the whole page, so these utilities and Tomo UI's tokens came from it; 4.1.0
+ * scopes it to SDK UI.
+ */
+@import "tailwindcss";
+
+@plugin "@tomo-inc/tomo-ui/tailwind/plugin";
+
+@source "../components";
+@source "../app";
+@source "../mdx-components.tsx";
+@source "../node_modules/@tomo-inc/tomo-ui/dist";
