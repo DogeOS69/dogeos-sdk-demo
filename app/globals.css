@@ -1,0 +1,26 @@
+/*
+ * The demo's own Tailwind build. Before SDK 4.1.0 the SDK stylesheet styled
+ * the whole page, so these utilities and Tomo UI's tokens came from it; 4.1.0
+ * scopes it to SDK UI.
+ */
+@import "tailwindcss";
+
+@plugin "@tomo-inc/tomo-ui/tailwind/plugin";
+
+@source "../components";
+@source "../app";
+@source "../mdx-components.tsx";
+@source "../node_modules/@tomo-inc/tomo-ui/dist";
+
+/*
+ * Dark-mode colors from the demo's SDK theme (`config.theme` in
+ * components/global-wallet-provider.tsx). Before 4.1.0 the SDK provider
+ * applied that theme to the whole page; Tomo UI's plugin only defines light,
+ * so dark mode would otherwise fall back to HeroUI's blue primary.
+ */
+.dark,
+[data-theme="dark"] {
+  --heroui-primary: 47.88 97.06% 60%; /* #FCD436 */
+  --heroui-primary-foreground: 240 40% 11.76%; /* #12122A */
+  --heroui-content1: 0 0% 10.2%; /* #1A1A1A */
+}
